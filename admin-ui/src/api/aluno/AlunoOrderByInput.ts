@@ -1,0 +1,33 @@
+import { SortOrder } from "../../util/SortOrder";
+
+export type AlunoOrderByInput = {
+  cidade?: SortOrder;
+  cpf?: SortOrder;
+  createdAt?: SortOrder;
+  dataEmissaoRg?: SortOrder;
+  dataNascimento?: SortOrder;
+  dataSaida?: SortOrder;
+  endereco?: SortOrder;
+  filiacaoMae?: SortOrder;
+  filiacaoPai?: SortOrder;
+  id?: SortOrder;
+  idadeInicioDroga?: SortOrder;
+  matricula?: SortOrder;
+  nome?: SortOrder;
+  outraClinica?: SortOrder;
+  possuiDoenca?: SortOrder;
+  processo?: SortOrder;
+  profissao?: SortOrder;
+  regulamento?: SortOrder;
+  religiao?: SortOrder;
+  rg?: SortOrder;
+  rgOrgaoExpedidor?: SortOrder;
+  secao?: SortOrder;
+  sexo?: SortOrder;
+  tempoInternacao?: SortOrder;
+  tiposDrogas?: SortOrder;
+  tituloEleitor?: SortOrder;
+  uf?: SortOrder;
+  updatedAt?: SortOrder;
+  zona?: SortOrder;
+};

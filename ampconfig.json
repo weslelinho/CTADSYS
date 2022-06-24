@@ -1,0 +1,19 @@
+{
+  "dataServiceGeneratorVersion": "0.13.1",
+  "appInfo": {
+    "name": "CTAD",
+    "description": "Cadastro Alunos CTAD",
+    "version": "4xhpldzu",
+    "id": "cl22qif9682386001s6x1xuipl5",
+    "url": "https://server.amplication.com/cl22qif9682386001s6x1xuipl5",
+    "settings": {
+      "dbHost": "localhost",
+      "dbName": "CTADDB",
+      "dbPassword": "Josué1,9",
+      "dbPort": 5432,
+      "dbUser": "CTADadmin",
+      "appId": "cl22qif9682386001s6x1xuipl5",
+      "authProvider": "Jwt"
+    }
+  }
+}

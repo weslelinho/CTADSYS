@@ -1,0 +1,94 @@
+datasource postgres {
+  provider = "postgresql"
+  url      = env("POSTGRESQL_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  createdAt DateTime @default(now())
+  firstName String?
+  id        String   @id @default(cuid())
+  lastName  String?
+  password  String
+  roles     String[]
+  updatedAt DateTime @updatedAt
+  username  String   @unique
+}
+
+model Aluno {
+  cidade                 String
+  cpf                    String
+  createdAt              DateTime                @default(now())
+  dataEmissaoRg          DateTime?
+  dataNascimento         DateTime
+  dataSaida              DateTime?
+  endereco               String?
+  filiacaoMae            String
+  filiacaoPai            String
+  id                     String                  @id @default(cuid())
+  idadeInicioDroga       String
+  matricula              Int                     @unique
+  nome                   String
+  ocorrencia             Ocorrencia[]
+  outraClinica           String?
+  participacaoAtividades ParticipacaoAtividade[]
+  possuiDoenca           String?
+  processo               String?
+  profissao              String
+  regulamento            Boolean?
+  religiao               String
+  rg                     String
+  rgOrgaoExpedidor       String
+  secao                  String
+  sexo                   EnumAlunoSexo
+  tempoInternacao        Boolean
+  tiposDrogas            String?
+  tituloEleitor          String
+  uf                     String
+  updatedAt              DateTime                @updatedAt
+  zona                   String
+}
+
+model Ocorrencia {
+  alunos    Aluno[]
+  createdAt DateTime            @default(now())
+  descricao String
+  id        String              @id @default(cuid())
+  tipo      EnumOcorrenciaTipo?
+  updatedAt DateTime            @updatedAt
+}
+
+model TipoAtividade {
+  createdAt              DateTime                @default(now())
+  id                     String                  @id @default(cuid())
+  nome                   String?
+  participacaoAtividades ParticipacaoAtividade[]
+  tempoDuracao           DateTime?
+  updatedAt              DateTime                @updatedAt
+}
+
+model ParticipacaoAtividade {
+  aluno           Aluno         @relation(fields: [alunoId], references: [id])
+  alunoId         String
+  createdAt       DateTime      @default(now())
+  data            DateTime?
+  id              String        @id @default(cuid())
+  tipoAtividade   TipoAtividade @relation(fields: [tipoAtividadeId], references: [id])
+  tipoAtividadeId String
+  updatedAt       DateTime      @updatedAt
+}
+
+enum EnumAlunoSexo {
+  Masculino
+  Feminino
+}
+
+enum EnumOcorrenciaTipo {
+  Saida
+  ComportamentoInadequado
+  Dispensado
+  Desobediencia
+}

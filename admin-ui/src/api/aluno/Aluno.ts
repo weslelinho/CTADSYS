@@ -1,0 +1,36 @@
+import { Ocorrencia } from "../ocorrencia/Ocorrencia";
+import { ParticipacaoAtividade } from "../participacaoAtividade/ParticipacaoAtividade";
+
+export type Aluno = {
+  cidade: string;
+  cpf: string;
+  createdAt: Date;
+  dataEmissaoRg: Date | null;
+  dataNascimento: Date;
+  dataSaida: Date | null;
+  endereco: string | null;
+  filiacaoMae: string;
+  filiacaoPai: string;
+  id: string;
+  idadeInicioDroga: string;
+  matricula: number;
+  nome: string;
+  ocorrencia?: Array<Ocorrencia>;
+  outraClinica: string | null;
+  participacaoAtividades?: Array<ParticipacaoAtividade>;
+  possuiDoenca: string | null;
+  processo: string | null;
+  profissao: string;
+  regulamento: boolean | null;
+  religiao: string;
+  rg: string;
+  rgOrgaoExpedidor: string;
+  secao: string;
+  sexo?: "Masculino" | "Feminino";
+  tempoInternacao: boolean;
+  tiposDrogas: string | null;
+  tituloEleitor: string;
+  uf: string;
+  updatedAt: Date;
+  zona: string;
+};

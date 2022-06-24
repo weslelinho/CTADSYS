@@ -1,0 +1,547 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Aluno {
+  cidade: String!
+  cpf: String!
+  createdAt: DateTime!
+  dataEmissaoRg: DateTime
+  dataNascimento: DateTime!
+  dataSaida: DateTime
+  endereco: String
+  filiacaoMae: String!
+  filiacaoPai: String!
+  id: String!
+  idadeInicioDroga: String!
+  matricula: Float!
+  nome: String!
+  ocorrencia(orderBy: [OcorrenciaOrderByInput!], skip: Float, take: Float, where: OcorrenciaWhereInput): [Ocorrencia!]!
+  outraClinica: String
+  participacaoAtividades(orderBy: [ParticipacaoAtividadeOrderByInput!], skip: Float, take: Float, where: ParticipacaoAtividadeWhereInput): [ParticipacaoAtividade!]!
+  possuiDoenca: String
+  processo: String
+  profissao: String!
+  regulamento: Boolean
+  religiao: String!
+  rg: String!
+  rgOrgaoExpedidor: String!
+  secao: String!
+  sexo: EnumAlunoSexo
+  tempoInternacao: Boolean!
+  tiposDrogas: String
+  tituloEleitor: String!
+  uf: String!
+  updatedAt: DateTime!
+  zona: String!
+}
+
+input AlunoCreateInput {
+  cidade: String!
+  cpf: String!
+  dataEmissaoRg: DateTime
+  dataNascimento: DateTime!
+  dataSaida: DateTime
+  endereco: String
+  filiacaoMae: String!
+  filiacaoPai: String!
+  idadeInicioDroga: String!
+  matricula: Float!
+  nome: String!
+  ocorrencia: OcorrenciaCreateNestedManyWithoutAlunosInput
+  outraClinica: String
+  participacaoAtividades: ParticipacaoAtividadeCreateNestedManyWithoutAlunosInput
+  possuiDoenca: String
+  processo: String
+  profissao: String!
+  regulamento: Boolean
+  religiao: String!
+  rg: String!
+  rgOrgaoExpedidor: String!
+  secao: String!
+  sexo: EnumAlunoSexo!
+  tempoInternacao: Boolean!
+  tiposDrogas: String
+  tituloEleitor: String!
+  uf: String!
+  zona: String!
+}
+
+input AlunoCreateNestedManyWithoutOcorrenciasInput {
+  connect: [AlunoWhereUniqueInput!]
+}
+
+input AlunoListRelationFilter {
+  every: AlunoWhereInput
+  none: AlunoWhereInput
+  some: AlunoWhereInput
+}
+
+input AlunoOrderByInput {
+  cidade: SortOrder
+  cpf: SortOrder
+  createdAt: SortOrder
+  dataEmissaoRg: SortOrder
+  dataNascimento: SortOrder
+  dataSaida: SortOrder
+  endereco: SortOrder
+  filiacaoMae: SortOrder
+  filiacaoPai: SortOrder
+  id: SortOrder
+  idadeInicioDroga: SortOrder
+  matricula: SortOrder
+  nome: SortOrder
+  outraClinica: SortOrder
+  possuiDoenca: SortOrder
+  processo: SortOrder
+  profissao: SortOrder
+  regulamento: SortOrder
+  religiao: SortOrder
+  rg: SortOrder
+  rgOrgaoExpedidor: SortOrder
+  secao: SortOrder
+  sexo: SortOrder
+  tempoInternacao: SortOrder
+  tiposDrogas: SortOrder
+  tituloEleitor: SortOrder
+  uf: SortOrder
+  updatedAt: SortOrder
+  zona: SortOrder
+}
+
+input AlunoUpdateInput {
+  cidade: String
+  cpf: String
+  dataEmissaoRg: DateTime
+  dataNascimento: DateTime
+  dataSaida: DateTime
+  endereco: String
+  filiacaoMae: String
+  filiacaoPai: String
+  idadeInicioDroga: String
+  matricula: Float
+  nome: String
+  ocorrencia: OcorrenciaUpdateManyWithoutAlunosInput
+  outraClinica: String
+  participacaoAtividades: ParticipacaoAtividadeUpdateManyWithoutAlunosInput
+  possuiDoenca: String
+  processo: String
+  profissao: String
+  regulamento: Boolean
+  religiao: String
+  rg: String
+  rgOrgaoExpedidor: String
+  secao: String
+  sexo: EnumAlunoSexo
+  tempoInternacao: Boolean
+  tiposDrogas: String
+  tituloEleitor: String
+  uf: String
+  zona: String
+}
+
+input AlunoUpdateManyWithoutOcorrenciasInput {
+  connect: [AlunoWhereUniqueInput!]
+  disconnect: [AlunoWhereUniqueInput!]
+  set: [AlunoWhereUniqueInput!]
+}
+
+input AlunoWhereInput {
+  cidade: StringFilter
+  cpf: StringFilter
+  dataEmissaoRg: DateTimeNullableFilter
+  dataNascimento: DateTimeFilter
+  dataSaida: DateTimeNullableFilter
+  endereco: StringNullableFilter
+  filiacaoMae: StringFilter
+  filiacaoPai: StringFilter
+  id: StringFilter
+  idadeInicioDroga: StringFilter
+  matricula: IntFilter
+  nome: StringFilter
+  ocorrencia: OcorrenciaListRelationFilter
+  outraClinica: StringNullableFilter
+  participacaoAtividades: ParticipacaoAtividadeListRelationFilter
+  possuiDoenca: StringNullableFilter
+  processo: StringNullableFilter
+  profissao: StringFilter
+  regulamento: BooleanNullableFilter
+  religiao: StringFilter
+  rg: StringFilter
+  rgOrgaoExpedidor: StringFilter
+  secao: StringFilter
+  sexo: EnumAlunoSexo
+  tempoInternacao: BooleanFilter
+  tiposDrogas: StringNullableFilter
+  tituloEleitor: StringFilter
+  uf: StringFilter
+  zona: StringFilter
+}
+
+input AlunoWhereUniqueInput {
+  id: String!
+}
+
+input BooleanFilter {
+  equals: Boolean
+  not: Boolean
+}
+
+input BooleanNullableFilter {
+  equals: Boolean
+  not: Boolean
+}
+
+input Credentials {
+  password: String!
+  username: String!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+input DateTimeFilter {
+  equals: DateTime
+  gt: DateTime
+  gte: DateTime
+  in: [DateTime!]
+  lt: DateTime
+  lte: DateTime
+  not: DateTime
+  notIn: [DateTime!]
+}
+
+input DateTimeNullableFilter {
+  equals: DateTime
+  gt: DateTime
+  gte: DateTime
+  in: [DateTime!]
+  lt: DateTime
+  lte: DateTime
+  not: DateTime
+  notIn: [DateTime!]
+}
+
+enum EnumAlunoSexo {
+  Feminino
+  Masculino
+}
+
+enum EnumOcorrenciaTipo {
+  ComportamentoInadequado
+  Desobediencia
+  Dispensado
+  Saida
+}
+
+input IntFilter {
+  equals: Int
+  gt: Int
+  gte: Int
+  in: [Int!]
+  lt: Int
+  lte: Int
+  not: Int
+  notIn: [Int!]
+}
+
+type MetaQueryPayload {
+  count: Float!
+}
+
+type Mutation {
+  createAluno(data: AlunoCreateInput!): Aluno!
+  createOcorrencia(data: OcorrenciaCreateInput!): Ocorrencia!
+  createParticipacaoAtividade(data: ParticipacaoAtividadeCreateInput!): ParticipacaoAtividade!
+  createTipoAtividade(data: TipoAtividadeCreateInput!): TipoAtividade!
+  createUser(data: UserCreateInput!): User!
+  deleteAluno(where: AlunoWhereUniqueInput!): Aluno!
+  deleteOcorrencia(where: OcorrenciaWhereUniqueInput!): Ocorrencia!
+  deleteParticipacaoAtividade(where: ParticipacaoAtividadeWhereUniqueInput!): ParticipacaoAtividade!
+  deleteTipoAtividade(where: TipoAtividadeWhereUniqueInput!): TipoAtividade!
+  deleteUser(where: UserWhereUniqueInput!): User!
+  login(credentials: Credentials!): UserInfo!
+  updateAluno(data: AlunoUpdateInput!, where: AlunoWhereUniqueInput!): Aluno!
+  updateOcorrencia(data: OcorrenciaUpdateInput!, where: OcorrenciaWhereUniqueInput!): Ocorrencia!
+  updateParticipacaoAtividade(data: ParticipacaoAtividadeUpdateInput!, where: ParticipacaoAtividadeWhereUniqueInput!): ParticipacaoAtividade!
+  updateTipoAtividade(data: TipoAtividadeUpdateInput!, where: TipoAtividadeWhereUniqueInput!): TipoAtividade!
+  updateUser(data: UserUpdateInput!, where: UserWhereUniqueInput!): User!
+}
+
+type Ocorrencia {
+  alunos(orderBy: [AlunoOrderByInput!], skip: Float, take: Float, where: AlunoWhereInput): [Aluno!]!
+  createdAt: DateTime!
+  descricao: String!
+  id: String!
+  tipo: EnumOcorrenciaTipo
+  updatedAt: DateTime!
+}
+
+input OcorrenciaCreateInput {
+  alunos: AlunoCreateNestedManyWithoutOcorrenciasInput
+  descricao: String!
+  tipo: EnumOcorrenciaTipo
+}
+
+input OcorrenciaCreateNestedManyWithoutAlunosInput {
+  connect: [OcorrenciaWhereUniqueInput!]
+}
+
+input OcorrenciaListRelationFilter {
+  every: OcorrenciaWhereInput
+  none: OcorrenciaWhereInput
+  some: OcorrenciaWhereInput
+}
+
+input OcorrenciaOrderByInput {
+  createdAt: SortOrder
+  descricao: SortOrder
+  id: SortOrder
+  tipo: SortOrder
+  updatedAt: SortOrder
+}
+
+input OcorrenciaUpdateInput {
+  alunos: AlunoUpdateManyWithoutOcorrenciasInput
+  descricao: String
+  tipo: EnumOcorrenciaTipo
+}
+
+input OcorrenciaUpdateManyWithoutAlunosInput {
+  connect: [OcorrenciaWhereUniqueInput!]
+  disconnect: [OcorrenciaWhereUniqueInput!]
+  set: [OcorrenciaWhereUniqueInput!]
+}
+
+input OcorrenciaWhereInput {
+  alunos: AlunoListRelationFilter
+  descricao: StringFilter
+  id: StringFilter
+  tipo: EnumOcorrenciaTipo
+}
+
+input OcorrenciaWhereUniqueInput {
+  id: String!
+}
+
+type ParticipacaoAtividade {
+  aluno: Aluno
+  createdAt: DateTime!
+  data: DateTime
+  id: String!
+  tipoAtividade: TipoAtividade
+  updatedAt: DateTime!
+}
+
+input ParticipacaoAtividadeCreateInput {
+  aluno: AlunoWhereUniqueInput!
+  data: DateTime
+  tipoAtividade: TipoAtividadeWhereUniqueInput!
+}
+
+input ParticipacaoAtividadeCreateNestedManyWithoutAlunosInput {
+  connect: [ParticipacaoAtividadeWhereUniqueInput!]
+}
+
+input ParticipacaoAtividadeCreateNestedManyWithoutTipoAtividadesInput {
+  connect: [ParticipacaoAtividadeWhereUniqueInput!]
+}
+
+input ParticipacaoAtividadeListRelationFilter {
+  every: ParticipacaoAtividadeWhereInput
+  none: ParticipacaoAtividadeWhereInput
+  some: ParticipacaoAtividadeWhereInput
+}
+
+input ParticipacaoAtividadeOrderByInput {
+  alunoId: SortOrder
+  createdAt: SortOrder
+  data: SortOrder
+  id: SortOrder
+  tipoAtividadeId: SortOrder
+  updatedAt: SortOrder
+}
+
+input ParticipacaoAtividadeUpdateInput {
+  aluno: AlunoWhereUniqueInput
+  data: DateTime
+  tipoAtividade: TipoAtividadeWhereUniqueInput
+}
+
+input ParticipacaoAtividadeUpdateManyWithoutAlunosInput {
+  connect: [ParticipacaoAtividadeWhereUniqueInput!]
+  disconnect: [ParticipacaoAtividadeWhereUniqueInput!]
+  set: [ParticipacaoAtividadeWhereUniqueInput!]
+}
+
+input ParticipacaoAtividadeUpdateManyWithoutTipoAtividadesInput {
+  connect: [ParticipacaoAtividadeWhereUniqueInput!]
+  disconnect: [ParticipacaoAtividadeWhereUniqueInput!]
+  set: [ParticipacaoAtividadeWhereUniqueInput!]
+}
+
+input ParticipacaoAtividadeWhereInput {
+  aluno: AlunoWhereUniqueInput
+  data: DateTimeNullableFilter
+  id: StringFilter
+  tipoAtividade: TipoAtividadeWhereUniqueInput
+}
+
+input ParticipacaoAtividadeWhereUniqueInput {
+  id: String!
+}
+
+type Query {
+  _alunosMeta(orderBy: [AlunoOrderByInput!], skip: Float, take: Float, where: AlunoWhereInput): MetaQueryPayload!
+  _ocorrenciasMeta(orderBy: [OcorrenciaOrderByInput!], skip: Float, take: Float, where: OcorrenciaWhereInput): MetaQueryPayload!
+  _participacaoAtividadesMeta(orderBy: [ParticipacaoAtividadeOrderByInput!], skip: Float, take: Float, where: ParticipacaoAtividadeWhereInput): MetaQueryPayload!
+  _tipoAtividadesMeta(orderBy: [TipoAtividadeOrderByInput!], skip: Float, take: Float, where: TipoAtividadeWhereInput): MetaQueryPayload!
+  _usersMeta(orderBy: [UserOrderByInput!], skip: Float, take: Float, where: UserWhereInput): MetaQueryPayload!
+  aluno(where: AlunoWhereUniqueInput!): Aluno
+  alunos(orderBy: [AlunoOrderByInput!], skip: Float, take: Float, where: AlunoWhereInput): [Aluno!]!
+  ocorrencia(where: OcorrenciaWhereUniqueInput!): Ocorrencia
+  ocorrencias(orderBy: [OcorrenciaOrderByInput!], skip: Float, take: Float, where: OcorrenciaWhereInput): [Ocorrencia!]!
+  participacaoAtividade(where: ParticipacaoAtividadeWhereUniqueInput!): ParticipacaoAtividade
+  participacaoAtividades(orderBy: [ParticipacaoAtividadeOrderByInput!], skip: Float, take: Float, where: ParticipacaoAtividadeWhereInput): [ParticipacaoAtividade!]!
+  tipoAtividade(where: TipoAtividadeWhereUniqueInput!): TipoAtividade
+  tipoAtividades(orderBy: [TipoAtividadeOrderByInput!], skip: Float, take: Float, where: TipoAtividadeWhereInput): [TipoAtividade!]!
+  user(where: UserWhereUniqueInput!): User
+  userInfo: UserInfo!
+  users(orderBy: [UserOrderByInput!], skip: Float, take: Float, where: UserWhereInput): [User!]!
+}
+
+enum QueryMode {
+  Default
+  Insensitive
+}
+
+enum SortOrder {
+  Asc
+  Desc
+}
+
+input StringFilter {
+  contains: String
+  endsWith: String
+  equals: String
+  gt: String
+  gte: String
+  in: [String!]
+  lt: String
+  lte: String
+  mode: QueryMode
+  not: String
+  notIn: [String!]
+  startsWith: String
+}
+
+input StringNullableFilter {
+  contains: String
+  endsWith: String
+  equals: String
+  gt: String
+  gte: String
+  in: [String!]
+  lt: String
+  lte: String
+  mode: QueryMode
+  not: String
+  notIn: [String!]
+  startsWith: String
+}
+
+type TipoAtividade {
+  createdAt: DateTime!
+  id: String!
+  nome: String
+  participacaoAtividades(orderBy: [ParticipacaoAtividadeOrderByInput!], skip: Float, take: Float, where: ParticipacaoAtividadeWhereInput): [ParticipacaoAtividade!]!
+  tempoDuracao: DateTime
+  updatedAt: DateTime!
+}
+
+input TipoAtividadeCreateInput {
+  nome: String
+  participacaoAtividades: ParticipacaoAtividadeCreateNestedManyWithoutTipoAtividadesInput
+  tempoDuracao: DateTime
+}
+
+input TipoAtividadeOrderByInput {
+  createdAt: SortOrder
+  id: SortOrder
+  nome: SortOrder
+  tempoDuracao: SortOrder
+  updatedAt: SortOrder
+}
+
+input TipoAtividadeUpdateInput {
+  nome: String
+  participacaoAtividades: ParticipacaoAtividadeUpdateManyWithoutTipoAtividadesInput
+  tempoDuracao: DateTime
+}
+
+input TipoAtividadeWhereInput {
+  id: StringFilter
+  nome: StringNullableFilter
+  participacaoAtividades: ParticipacaoAtividadeListRelationFilter
+  tempoDuracao: DateTimeNullableFilter
+}
+
+input TipoAtividadeWhereUniqueInput {
+  id: String!
+}
+
+type User {
+  createdAt: DateTime!
+  firstName: String
+  id: String!
+  lastName: String
+  roles: [String!]!
+  updatedAt: DateTime!
+  username: String!
+}
+
+input UserCreateInput {
+  firstName: String
+  lastName: String
+  password: String!
+  roles: [String!]!
+  username: String!
+}
+
+type UserInfo {
+  accessToken: String
+  roles: [String!]!
+  username: String!
+}
+
+input UserOrderByInput {
+  createdAt: SortOrder
+  firstName: SortOrder
+  id: SortOrder
+  lastName: SortOrder
+  password: SortOrder
+  roles: SortOrder
+  updatedAt: SortOrder
+  username: SortOrder
+}
+
+input UserUpdateInput {
+  firstName: String
+  lastName: String
+  password: String
+  roles: [String!]
+  username: String
+}
+
+input UserWhereInput {
+  firstName: StringNullableFilter
+  id: StringFilter
+  lastName: StringNullableFilter
+  username: StringFilter
+}
+
+input UserWhereUniqueInput {
+  id: String!
+}

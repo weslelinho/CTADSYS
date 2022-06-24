@@ -1,0 +1,33 @@
+import { OcorrenciaCreateNestedManyWithoutAlunosInput } from "./OcorrenciaCreateNestedManyWithoutAlunosInput";
+import { ParticipacaoAtividadeCreateNestedManyWithoutAlunosInput } from "./ParticipacaoAtividadeCreateNestedManyWithoutAlunosInput";
+
+export type AlunoCreateInput = {
+  cidade: string;
+  cpf: string;
+  dataEmissaoRg?: Date | null;
+  dataNascimento: Date;
+  dataSaida?: Date | null;
+  endereco?: string | null;
+  filiacaoMae: string;
+  filiacaoPai: string;
+  idadeInicioDroga: string;
+  matricula: number;
+  nome: string;
+  ocorrencia?: OcorrenciaCreateNestedManyWithoutAlunosInput;
+  outraClinica?: string | null;
+  participacaoAtividades?: ParticipacaoAtividadeCreateNestedManyWithoutAlunosInput;
+  possuiDoenca?: string | null;
+  processo?: string | null;
+  profissao: string;
+  regulamento?: boolean | null;
+  religiao: string;
+  rg: string;
+  rgOrgaoExpedidor: string;
+  secao: string;
+  sexo: "Masculino" | "Feminino";
+  tempoInternacao: boolean;
+  tiposDrogas?: string | null;
+  tituloEleitor: string;
+  uf: string;
+  zona: string;
+};
