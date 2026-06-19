@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="CTAD - Comunidade Terapêutica Amparados por Deus. Tratamento e acolhimento para dependência química.">
+  <title>CTAD — Comunidade Terapêutica Amparados por Deus</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header class="header">
+    <div class="header__inner">
+      <a href="/" class="logo">
+        <div class="logo__icon">🏥</div>
+        <span>CTAD</span>
+      </a>
+      <nav class="nav">
+        <a href="#sobre">Sobre</a>
+        <a href="#servicos">Serviços</a>
+        <a href="#contato">Contato</a>
+        <a href="#login-card" class="btn btn--primary btn--sm">Acessar Sistema</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero__inner">
+        <div class="hero__content">
+          <span class="hero__badge">Comunidade Terapêutica</span>
+          <h1 class="hero__title">
+            Amparados por Deus,<br>
+            <span>restaurando vidas</span>
+          </h1>
+          <p class="hero__subtitle">
+            A CTAD é uma comunidade terapêutica dedicada ao acolhimento, tratamento e
+            reintegração de pessoas em recuperação da dependência química — com amor,
+            disciplina e fé.
+          </p>
+          <div class="hero__actions">
+            <a href="#sobre" class="btn btn--outline">Conheça a CTAD</a>
+            <a href="#contato" class="btn btn--primary">Fale Conosco</a>
+          </div>
+          <div class="hero__stats">
+            <div class="stat">
+              <div class="stat__number">24h</div>
+              <div class="stat__label">Acolhimento contínuo</div>
+            </div>
+            <div class="stat">
+              <div class="stat__number">100%</div>
+              <div class="stat__label">Compromisso com a vida</div>
+            </div>
+            <div class="stat">
+              <div class="stat__number">∞</div>
+              <div class="stat__label">Esperança renovada</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero__card" id="login-card">
+          <div id="alert-box" class="alert" role="alert"></div>
+          <h2 class="hero__card-title">Sistema de Cadastro</h2>
+          <p class="hero__card-text">
+            Área restrita para equipe autorizada. Informe usuário e senha
+            para acessar o cadastro de clientes.
+          </p>
+          <form id="login-form" novalidate>
+            <div class="form-group">
+              <label for="username">Usuário</label>
+              <input type="text" id="username" name="username" required autocomplete="username" placeholder="Seu usuário">
+            </div>
+            <div class="form-group">
+              <label for="password">Senha</label>
+              <input type="password" id="password" name="password" required autocomplete="current-password" placeholder="Sua senha">
+            </div>
+            <button type="submit" class="btn btn--primary" id="login-btn" style="width: 100%;">Entrar</button>
+          </form>
+          <hr class="hero__card-divider">
+          <p class="hero__card-text" style="font-size: 0.85rem; margin-bottom: 0;">
+            Apenas administradores e equipe autorizada têm acesso ao sistema interno.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--alt" id="sobre">
+      <div class="section__inner">
+        <div class="about">
+          <div class="about__visual">
+            <blockquote>
+              "Porque eu bem sei os pensamentos que tenho a vosso respeito, diz o Senhor;
+              pensamentos de paz e não de mal, para vos dar o fim que esperais."
+            </blockquote>
+            <cite>— Jeremias 29:11</cite>
+          </div>
+          <div class="about__content">
+            <span class="section__label">Quem Somos</span>
+            <h2 class="section__title" style="text-align: left; margin-bottom: 1rem;">
+              Comunidade Terapêutica Amparados por Deus
+            </h2>
+            <p>
+              A CTAD nasceu da convicção de que toda vida tem valor e que a recuperação
+              é possível quando há acolhimento, estrutura e amor incondicional.
+            </p>
+            <p>
+              Oferecemos um ambiente seguro e disciplinado, onde cada pessoa é tratada
+              com dignidade e recebe o suporte necessário para reconstruir sua história.
+            </p>
+            <ul class="about__list">
+              <li>Acolhimento 24 horas</li>
+              <li>Tratamento baseado em comunidade terapêutica</li>
+              <li>Acompanhamento espiritual e emocional</li>
+              <li>Reintegração social e familiar</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="servicos">
+      <div class="section__inner">
+        <div class="section__header">
+          <span class="section__label">Nossos Serviços</span>
+          <h2 class="section__title">Cuidado integral na recuperação</h2>
+          <p class="section__desc">
+            Trabalhamos de forma multidisciplinar para garantir que cada pessoa
+            receba o suporte necessário em todas as dimensões da vida.
+          </p>
+        </div>
+        <div class="features">
+          <div class="feature">
+            <div class="feature__icon">🤝</div>
+            <h3 class="feature__title">Acolhimento</h3>
+            <p class="feature__text">
+              Recepção imediata e ambiente seguro para quem busca uma nova chance de vida.
+            </p>
+          </div>
+          <div class="feature">
+            <div class="feature__icon">🧠</div>
+            <h3 class="feature__title">Tratamento Terapêutico</h3>
+            <p class="feature__text">
+              Programa estruturado com rotina, responsabilidades compartilhadas e autoconhecimento.
+            </p>
+          </div>
+          <div class="feature">
+            <div class="feature__icon">🙏</div>
+            <h3 class="feature__title">Apoio Espiritual</h3>
+            <p class="feature__text">
+              Fortalecimento da fé como pilar fundamental no processo de transformação pessoal.
+            </p>
+          </div>
+          <div class="feature">
+            <div class="feature__icon">👨‍👩‍👧</div>
+            <h3 class="feature__title">Reintegração Familiar</h3>
+            <p class="feature__text">
+              Trabalho conjunto com famílias para restaurar vínculos e construir uma rede de apoio.
+            </p>
+          </div>
+          <div class="feature">
+            <div class="feature__icon">💼</div>
+            <h3 class="feature__title">Capacitação Profissional</h3>
+            <p class="feature__text">
+              Desenvolvimento de habilidades e preparação para o retorno ao mercado de trabalho.
+            </p>
+          </div>
+          <div class="feature">
+            <div class="feature__icon">📋</div>
+            <h3 class="feature__title">Acompanhamento Pós-Alta</h3>
+            <p class="feature__text">
+              Suporte contínuo após a alta para manter a sobriedade e prevenir recaídas.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--alt">
+      <div class="section__inner">
+        <div class="cta">
+          <h2 class="cta__title">Precisa de ajuda?</h2>
+          <p class="cta__text">
+            Não espere mais. Entre em contato conosco e dê o primeiro passo
+            em direção à sua recuperação.
+          </p>
+          <a href="#contato" class="btn btn--outline" style="border-color: #fff; color: #fff;">
+            Entrar em Contato
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer" id="contato">
+    <div class="footer__inner">
+      <div>
+        <div class="footer__brand">CTAD</div>
+        <p class="footer__desc">
+          Comunidade Terapêutica Amparados por Deus — dedicada ao acolhimento
+          e tratamento de pessoas em recuperação da dependência química.
+        </p>
+      </div>
+      <div>
+        <div class="footer__heading">Links</div>
+        <ul class="footer__links">
+          <li><a href="#sobre">Sobre nós</a></li>
+          <li><a href="#servicos">Serviços</a></li>
+          <li><a href="#login-card">Acessar Sistema</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer__heading">Contato</div>
+        <ul class="footer__links">
+          <li><a href="mailto:contato@ctad.org.br">contato@ctad.org.br</a></li>
+          <li><a href="tel:+5500000000000">(00) 0000-0000</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      &copy; 2026 CTAD — Comunidade Terapêutica Amparados por Deus. Todos os direitos reservados.
+    </div>
+  </footer>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>

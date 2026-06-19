@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel Administrativo — CTAD</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="admin-body">
+  <div class="admin-layout">
+    <aside class="sidebar">
+      <div class="sidebar__brand">
+        <div class="logo__icon">🏥</div>
+        <span>CTAD</span>
+      </div>
+
+      <nav class="sidebar__nav">
+        <a href="#" class="sidebar__link sidebar__link--active" data-page="pacientes">
+          <span class="sidebar__icon">👥</span>
+          Pacientes
+        </a>
+        <a href="#" class="sidebar__link" data-page="ocorrencias">
+          <span class="sidebar__icon">📝</span>
+          Ocorrências
+        </a>
+      </nav>
+
+      <div class="sidebar__footer">
+        <div class="sidebar__user" id="user-info">
+          <span id="user-name"></span>
+        </div>
+        <a href="/" class="sidebar__link sidebar__link--muted">← Site público</a>
+        <a href="/auth/logout" class="sidebar__link sidebar__link--muted">Sair</a>
+      </div>
+    </aside>
+
+    <div class="admin-main">
+      <header class="admin-topbar">
+        <div>
+          <p class="admin-topbar__breadcrumb">Administração</p>
+          <h1 class="admin-topbar__title" id="page-title">Pacientes</h1>
+        </div>
+      </header>
+
+      <section class="admin-content admin-page" id="page-pacientes">
+        <div class="card">
+          <div class="card__toolbar">
+            <div class="search-bar">
+              <input type="search" id="search-input" placeholder="Buscar por nome, CPF ou telefone...">
+            </div>
+            <button type="button" class="btn btn--primary" id="new-patient-btn">+ Novo Paciente</button>
+          </div>
+
+          <div class="table-wrapper">
+            <table class="clients-table">
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>CPF</th>
+                  <th>Telefone</th>
+                  <th>Admissão</th>
+                  <th>Status</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="clients-tbody">
+                <tr>
+                  <td colspan="6">
+                    <div class="empty-state">
+                      <div class="empty-state__icon">📋</div>
+                      <p>Carregando pacientes...</p>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="admin-content admin-page" id="page-ocorrencias" hidden>
+        <div class="card">
+          <div class="card__toolbar">
+            <div class="search-bar">
+              <input type="search" id="occurrence-search-input" placeholder="Buscar por paciente ou descrição...">
+            </div>
+            <button type="button" class="btn btn--primary" id="new-occurrence-btn">+ Nova Ocorrência</button>
+          </div>
+
+          <div class="table-wrapper">
+            <table class="clients-table">
+              <thead>
+                <tr>
+                  <th>Data e Hora</th>
+                  <th>Paciente</th>
+                  <th>Descrição</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="occurrences-tbody">
+                <tr>
+                  <td colspan="4">
+                    <div class="empty-state">
+                      <div class="empty-state__icon">📝</div>
+                      <p>Carregando ocorrências...</p>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div id="patient-modal" class="modal" aria-hidden="true">
+    <div class="modal__backdrop" data-close-patient-modal></div>
+    <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="form-title">
+      <div class="modal__header">
+        <h2 class="modal__title" id="form-title">Novo Paciente</h2>
+        <button type="button" class="modal__close" data-close-patient-modal aria-label="Fechar">&times;</button>
+      </div>
+
+      <div class="modal__body">
+        <div id="form-alert" class="alert" role="alert"></div>
+        <form id="client-form" novalidate>
+          <input type="hidden" id="client-id">
+
+          <div class="form-group">
+            <label for="fullName">Nome Completo *</label>
+            <input type="text" id="fullName" name="fullName" required placeholder="Nome completo do paciente">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="cpf">CPF</label>
+              <input type="text" id="cpf" name="cpf" placeholder="000.000.000-00" maxlength="14">
+            </div>
+            <div class="form-group">
+              <label for="birthDate">Data de Nascimento</label>
+              <input type="date" id="birthDate" name="birthDate">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="phone">Telefone</label>
+              <input type="tel" id="phone" name="phone" placeholder="(00) 00000-0000">
+            </div>
+            <div class="form-group">
+              <label for="email">E-mail</label>
+              <input type="email" id="email" name="email" placeholder="email@exemplo.com">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="address">Endereço</label>
+            <input type="text" id="address" name="address" placeholder="Rua, número, bairro">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="city">Cidade</label>
+              <input type="text" id="city" name="city">
+            </div>
+            <div class="form-group">
+              <label for="state">Estado</label>
+              <input type="text" id="state" name="state" maxlength="2" placeholder="UF">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="admissionDate">Data de Admissão</label>
+              <input type="date" id="admissionDate" name="admissionDate">
+            </div>
+            <div class="form-group">
+              <label for="status">Status</label>
+              <select id="status" name="status">
+                <option value="ativo">Ativo</option>
+                <option value="alta">Alta</option>
+                <option value="transferido">Transferido</option>
+                <option value="desligado">Desligado</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="notes">Observações</label>
+            <textarea id="notes" name="notes" placeholder="Informações adicionais..."></textarea>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn--primary" id="submit-btn">Salvar</button>
+            <button type="button" class="btn btn--outline" data-close-patient-modal>Cancelar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div id="delete-patient-modal" class="modal" aria-hidden="true">
+    <div class="modal__backdrop" data-close-delete-modal></div>
+    <div class="modal__dialog modal__dialog--sm" role="dialog" aria-modal="true" aria-labelledby="delete-modal-title">
+      <div class="modal__header">
+        <h2 class="modal__title" id="delete-modal-title">Confirmar exclusão</h2>
+        <button type="button" class="modal__close" data-close-delete-modal aria-label="Fechar">&times;</button>
+      </div>
+      <div class="modal__body">
+        <p class="confirm-message" id="delete-confirm-message">
+          Tem certeza que deseja excluir este paciente?
+        </p>
+        <p class="confirm-hint">
+          O paciente será ocultado da listagem, mas o registro permanecerá no banco de dados.
+        </p>
+        <div id="delete-alert" class="alert" role="alert"></div>
+        <div class="form-actions">
+          <button type="button" class="btn btn--danger" id="confirm-delete-btn">Excluir paciente</button>
+          <button type="button" class="btn btn--outline" data-close-delete-modal>Cancelar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="occurrence-modal" class="modal" aria-hidden="true">
+    <div class="modal__backdrop" data-close-occurrence-modal></div>
+    <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="occurrence-form-title">
+      <div class="modal__header">
+        <h2 class="modal__title" id="occurrence-form-title">Nova Ocorrência</h2>
+        <button type="button" class="modal__close" data-close-occurrence-modal aria-label="Fechar">&times;</button>
+      </div>
+
+      <div class="modal__body">
+        <div id="occurrence-form-alert" class="alert" role="alert"></div>
+        <form id="occurrence-form" novalidate>
+          <div class="form-group">
+            <label for="occurrence-client">Paciente *</label>
+            <select id="occurrence-client" name="clientId" required>
+              <option value="">Selecione um paciente</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="occurred-at">Data e Hora *</label>
+            <input type="datetime-local" id="occurred-at" name="occurredAt" required>
+          </div>
+
+          <div class="form-group">
+            <label for="occurrence-description">Descrição *</label>
+            <textarea id="occurrence-description" name="description" required placeholder="Descreva a ocorrência..." rows="5"></textarea>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn--primary" id="occurrence-submit-btn">Salvar</button>
+            <button type="button" class="btn btn--outline" data-close-occurrence-modal>Cancelar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/admin.js"></script>
+  <script src="/js/cadastro.js"></script>
+  <script src="/js/ocorrencias.js"></script>
+</body>
+</html>
