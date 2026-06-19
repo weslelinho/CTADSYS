@@ -16,6 +16,11 @@ const clientRepository = {
     return row ? new Client(row) : null;
   },
 
+  exists(id) {
+    const row = db.prepare('SELECT id FROM clients WHERE id = ?').get(id);
+    return Boolean(row);
+  },
+
   findByCpf(cpf) {
     const row = db
       .prepare('SELECT * FROM clients WHERE cpf = ? AND hidden = 0')

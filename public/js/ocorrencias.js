@@ -15,12 +15,22 @@ const occurrenceClientSelect = document.getElementById('occurrence-client');
 document.addEventListener('DOMContentLoaded', () => {
   occurrenceForm.addEventListener('submit', handleOccurrenceSubmit);
   occurrenceSearchInput.addEventListener('input', renderOccurrences);
+  occurrencesTbody.addEventListener('click', handleOccurrenceTableClick);
   newOccurrenceBtn.addEventListener('click', openNewOccurrenceModal);
 
   occurrenceModal.querySelectorAll('[data-close-occurrence-modal]').forEach((el) => {
     el.addEventListener('click', closeOccurrenceModal);
   });
 });
+
+function handleOccurrenceTableClick(e) {
+  const btn = e.target.closest('[data-action]');
+  if (!btn) return;
+
+  const id = Number(btn.dataset.id);
+  if (btn.dataset.action === 'edit') editOccurrence(id);
+  if (btn.dataset.action === 'delete') deleteOccurrence(id);
+}
 
 async function onPageShow() {
   await Promise.all([loadPatientsForSelect(), loadOccurrences()]);
@@ -116,8 +126,8 @@ function renderOccurrences() {
       <td class="description-cell" title="${Admin.escapeHtml(o.description)}">${Admin.escapeHtml(truncateText(o.description, 80))}</td>
       <td>
         <div class="table-actions">
-          <button class="btn btn--outline btn--sm" onclick="editOccurrence(${o.id})">Editar</button>
-          <button class="btn btn--danger btn--sm" onclick="deleteOccurrence(${o.id})">Excluir</button>
+          <button type="button" class="btn btn--outline btn--sm" data-action="edit" data-id="${o.id}">Editar</button>
+          <button type="button" class="btn btn--danger btn--sm" data-action="delete" data-id="${o.id}">Excluir</button>
         </div>
       </td>
     </tr>`
@@ -278,5 +288,3 @@ function hideOccurrenceAlert() {
 }
 
 window.Occurrences = { onPageShow };
-window.editOccurrence = editOccurrence;
-window.deleteOccurrence = deleteOccurrence;
