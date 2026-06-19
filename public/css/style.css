@@ -67,7 +67,7 @@ img {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 70px;
+  height: 88px;
 }
 
 .logo {
@@ -79,15 +79,17 @@ img {
   color: var(--color-primary-dark);
 }
 
-.logo__icon {
-  width: 42px;
-  height: 42px;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.4rem;
+.logo__img {
+  width: 76px;
+  height: 76px;
+  object-fit: contain;
+  flex-shrink: 0;
+  border-radius: 50%;
+}
+
+.logo__img--sidebar {
+  width: 96px;
+  height: 96px;
 }
 
 .nav {
@@ -469,10 +471,14 @@ img {
 }
 
 .footer__brand {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #fff;
   margin-bottom: 0.75rem;
+}
+
+.footer__logo {
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+  border-radius: 50%;
 }
 
 .footer__desc {
@@ -567,18 +573,10 @@ img {
 .sidebar__brand {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0 1.5rem 1.5rem;
-  font-weight: 700;
-  font-size: 1.2rem;
+  justify-content: center;
+  padding: 1rem 1.5rem 1.25rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
   margin-bottom: 1rem;
-}
-
-.sidebar__brand .logo__icon {
-  width: 38px;
-  height: 38px;
-  font-size: 1.2rem;
 }
 
 .sidebar__nav {
@@ -1191,6 +1189,11 @@ body.modal-open {
     border-bottom: none;
     margin-bottom: 0;
     padding: 0 1rem 0 0;
+  }
+
+  .logo__img--sidebar {
+    width: 72px;
+    height: 72px;
   }
 
   .sidebar__nav {
