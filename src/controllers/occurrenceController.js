@@ -21,7 +21,7 @@ const occurrenceController = {
 
   create(req, res, next) {
     try {
-      const occurrence = occurrenceService.createOccurrence(req.body, req.user.id);
+      const occurrence = occurrenceService.createOccurrence(req.body, req.user.id, req);
       res.status(201).json({ occurrence: occurrence.toJSON() });
     } catch (err) {
       next(err);
@@ -30,7 +30,7 @@ const occurrenceController = {
 
   update(req, res, next) {
     try {
-      const occurrence = occurrenceService.updateOccurrence(req.params.id, req.body);
+      const occurrence = occurrenceService.updateOccurrence(req.params.id, req.body, req.user.id, req);
       res.json({ occurrence: occurrence.toJSON() });
     } catch (err) {
       next(err);
@@ -39,7 +39,7 @@ const occurrenceController = {
 
   remove(req, res, next) {
     try {
-      occurrenceService.deleteOccurrence(req.params.id);
+      occurrenceService.deleteOccurrence(req.params.id, req.user.id, req);
       res.status(204).send();
     } catch (err) {
       next(err);

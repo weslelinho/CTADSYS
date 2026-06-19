@@ -45,6 +45,7 @@ async function seedDefaultAdmin() {
 }
 
 const { initializeOccurrencesTable } = require('./occurrences');
+const { initializeAuditLogsTable } = require('./auditLogs');
 
 function initializeDatabase() {
   db.exec(`
@@ -73,6 +74,7 @@ function initializeDatabase() {
   migrateClientsHiddenColumn();
   migrateClientsPhotoColumn();
   initializeOccurrencesTable(db);
+  initializeAuditLogsTable(db);
 }
 
 function migrateClientsHiddenColumn() {
