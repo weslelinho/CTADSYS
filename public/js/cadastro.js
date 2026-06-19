@@ -33,12 +33,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   deleteModal.querySelectorAll('[data-close-delete-modal]').forEach((el) => {
     el.addEventListener('click', closeDeleteModal);
   });
-
-  document.addEventListener('keydown', (e) => {
-    if (e.key !== 'Escape') return;
-    if (deleteModal.classList.contains('modal--open')) closeDeleteModal();
-    else if (modal.classList.contains('modal--open')) closeModal();
-  });
 });
 
 async function loadClients() {
@@ -98,6 +92,21 @@ function renderClients() {
     .join('');
 }
 
+function fillPatientForm(client) {
+  document.getElementById('client-id').value = client.id || '';
+  document.getElementById('fullName').value = client.fullName || '';
+  document.getElementById('cpf').value = client.cpf || '';
+  document.getElementById('birthDate').value = client.birthDate || '';
+  document.getElementById('phone').value = client.phone || '';
+  document.getElementById('email').value = client.email || '';
+  document.getElementById('address').value = client.address || '';
+  document.getElementById('city').value = client.city || '';
+  document.getElementById('state').value = client.state || '';
+  document.getElementById('admissionDate').value = client.admissionDate || '';
+  document.getElementById('status').value = client.status || 'ativo';
+  document.getElementById('notes').value = client.notes || '';
+}
+
 function openModal() {
   modal.classList.add('modal--open');
   modal.setAttribute('aria-hidden', 'false');
@@ -138,8 +147,31 @@ function closeDeleteModal() {
 function openNewPatientModal() {
   resetForm();
   formTitle.textContent = 'Novo Paciente';
-  submitBtn.textContent = 'Salvar';
   openModal();
+}
+
+async function editClient(id) {
+  hideAlert();
+  formTitle.textContent = 'Editar Paciente';
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Carregando...';
+  openModal();
+
+  try {
+    const res = await fetch(`/api/clients/${id}`);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Paciente não encontrado');
+
+    editingId = id;
+    fillPatientForm(data.client);
+  } catch (err) {
+    closeModal();
+    alert(err.message);
+    return;
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Salvar';
+  }
 }
 
 async function handleSubmit(e) {
@@ -182,7 +214,7 @@ async function handleSubmit(e) {
     showAlert(err.message, 'error');
   } finally {
     submitBtn.disabled = false;
-    submitBtn.textContent = isEditing ? 'Atualizar' : 'Salvar';
+    submitBtn.textContent = 'Salvar';
   }
 }
 
@@ -228,33 +260,10 @@ function getFormData() {
   };
 }
 
-function editClient(id) {
-  const client = clients.find((c) => c.id === id);
-  if (!client) return;
-
-  editingId = id;
-  formTitle.textContent = 'Editar Paciente';
-  submitBtn.textContent = 'Atualizar';
-
-  document.getElementById('fullName').value = client.fullName || '';
-  document.getElementById('cpf').value = client.cpf || '';
-  document.getElementById('birthDate').value = client.birthDate || '';
-  document.getElementById('phone').value = client.phone || '';
-  document.getElementById('email').value = client.email || '';
-  document.getElementById('address').value = client.address || '';
-  document.getElementById('city').value = client.city || '';
-  document.getElementById('state').value = client.state || '';
-  document.getElementById('admissionDate').value = client.admissionDate || '';
-  document.getElementById('status').value = client.status || 'ativo';
-  document.getElementById('notes').value = client.notes || '';
-
-  hideAlert();
-  openModal();
-}
-
 function resetForm() {
   editingId = null;
   form.reset();
+  document.getElementById('client-id').value = '';
   formTitle.textContent = 'Novo Paciente';
   submitBtn.textContent = 'Salvar';
   hideAlert();

@@ -20,12 +20,6 @@ document.addEventListener('DOMContentLoaded', () => {
   occurrenceModal.querySelectorAll('[data-close-occurrence-modal]').forEach((el) => {
     el.addEventListener('click', closeOccurrenceModal);
   });
-
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && occurrenceModal.classList.contains('modal--open')) {
-      closeOccurrenceModal();
-    }
-  });
 });
 
 async function onPageShow() {
@@ -44,15 +38,21 @@ async function loadPatientsForSelect() {
   }
 }
 
-function renderPatientOptions(selectedId) {
-  if (patientsForSelect.length === 0) {
+function renderPatientOptions(selectedId, extraPatient) {
+  let list = [...patientsForSelect];
+
+  if (extraPatient && !list.some((p) => p.id === extraPatient.id)) {
+    list.unshift(extraPatient);
+  }
+
+  if (list.length === 0) {
     occurrenceClientSelect.innerHTML = '<option value="">Nenhum paciente cadastrado</option>';
     return;
   }
 
   const options = ['<option value="">Selecione um paciente</option>']
     .concat(
-      patientsForSelect.map(
+      list.map(
         (p) =>
           `<option value="${p.id}"${Number(selectedId) === p.id ? ' selected' : ''}>${Admin.escapeHtml(p.fullName)}</option>`
       )
@@ -60,6 +60,15 @@ function renderPatientOptions(selectedId) {
     .join('');
 
   occurrenceClientSelect.innerHTML = options;
+}
+
+function fillOccurrenceForm(occurrence) {
+  renderPatientOptions(occurrence.clientId, {
+    id: occurrence.clientId,
+    fullName: occurrence.clientName,
+  });
+  document.getElementById('occurred-at').value = Admin.toDatetimeLocalValue(occurrence.occurredAt);
+  document.getElementById('occurrence-description').value = occurrence.description || '';
 }
 
 async function loadOccurrences() {
@@ -130,7 +139,9 @@ function openOccurrenceModal() {
 function closeOccurrenceModal() {
   occurrenceModal.classList.remove('modal--open');
   occurrenceModal.setAttribute('aria-hidden', 'true');
-  document.body.classList.remove('modal-open');
+  if (!document.querySelector('.modal.modal--open')) {
+    document.body.classList.remove('modal-open');
+  }
   resetOccurrenceForm();
 }
 
@@ -138,9 +149,34 @@ async function openNewOccurrenceModal() {
   await loadPatientsForSelect();
   resetOccurrenceForm();
   occurrenceFormTitle.textContent = 'Nova Ocorrência';
-  occurrenceSubmitBtn.textContent = 'Salvar';
   document.getElementById('occurred-at').value = Admin.nowDatetimeLocalValue();
   openOccurrenceModal();
+}
+
+async function editOccurrence(id) {
+  hideOccurrenceAlert();
+  occurrenceFormTitle.textContent = 'Editar Ocorrência';
+  occurrenceSubmitBtn.disabled = true;
+  occurrenceSubmitBtn.textContent = 'Carregando...';
+  openOccurrenceModal();
+
+  try {
+    await loadPatientsForSelect();
+
+    const res = await fetch(`/api/occurrences/${id}`);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Ocorrência não encontrada');
+
+    editingOccurrenceId = id;
+    fillOccurrenceForm(data.occurrence);
+  } catch (err) {
+    closeOccurrenceModal();
+    alert(err.message);
+    return;
+  } finally {
+    occurrenceSubmitBtn.disabled = false;
+    occurrenceSubmitBtn.textContent = 'Salvar';
+  }
 }
 
 async function handleOccurrenceSubmit(e) {
@@ -191,7 +227,7 @@ async function handleOccurrenceSubmit(e) {
     showOccurrenceAlert(err.message, 'error');
   } finally {
     occurrenceSubmitBtn.disabled = false;
-    occurrenceSubmitBtn.textContent = isEditing ? 'Atualizar' : 'Salvar';
+    occurrenceSubmitBtn.textContent = 'Salvar';
   }
 }
 
@@ -201,24 +237,6 @@ function getOccurrenceFormData() {
     occurredAt: document.getElementById('occurred-at').value,
     description: document.getElementById('occurrence-description').value.trim(),
   };
-}
-
-async function editOccurrence(id) {
-  const occurrence = occurrences.find((o) => o.id === id);
-  if (!occurrence) return;
-
-  await loadPatientsForSelect();
-
-  editingOccurrenceId = id;
-  occurrenceFormTitle.textContent = 'Editar Ocorrência';
-  occurrenceSubmitBtn.textContent = 'Atualizar';
-
-  renderPatientOptions(occurrence.clientId);
-  document.getElementById('occurred-at').value = Admin.toDatetimeLocalValue(occurrence.occurredAt);
-  document.getElementById('occurrence-description').value = occurrence.description;
-
-  hideOccurrenceAlert();
-  openOccurrenceModal();
 }
 
 async function deleteOccurrence(id) {
