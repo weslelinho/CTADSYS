@@ -52,7 +52,7 @@ const occurrenceService = {
   },
 
   updateOccurrence(id, data) {
-    this.getOccurrence(id);
+    const existing = this.getOccurrence(id);
 
     if (!data.clientId) {
       const error = new Error('Paciente é obrigatório');
@@ -66,8 +66,11 @@ const occurrenceService = {
       throw error;
     }
 
-    const client = clientRepository.findById(data.clientId);
-    if (!client) {
+    const clientId = Number(data.clientId);
+    const client = clientRepository.findById(clientId);
+    const isSameClient = clientId === Number(existing.clientId);
+
+    if (!client && !(isSameClient && clientRepository.exists(clientId))) {
       const error = new Error('Paciente não encontrado');
       error.status = 404;
       throw error;
@@ -81,7 +84,7 @@ const occurrenceService = {
     }
 
     return occurrenceRepository.update(id, {
-      clientId: data.clientId,
+      clientId,
       description: data.description.trim(),
       occurredAt,
     });

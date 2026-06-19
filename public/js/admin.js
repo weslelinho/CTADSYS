@@ -87,6 +87,23 @@ function nowDatetimeLocalValue() {
   return now.toISOString().slice(0, 16);
 }
 
+function getOpenModals() {
+  return Array.from(document.querySelectorAll('.modal.modal--open'));
+}
+
+function closeTopModal() {
+  const openModals = getOpenModals();
+  if (openModals.length === 0) return;
+
+  const topModal = openModals[openModals.length - 1];
+  const closeBtn = topModal.querySelector('[data-close-patient-modal], [data-close-delete-modal], [data-close-occurrence-modal]');
+  if (closeBtn) closeBtn.click();
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeTopModal();
+});
+
 window.Admin = {
   escapeHtml,
   formatDate,
