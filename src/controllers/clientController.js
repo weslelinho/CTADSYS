@@ -1,4 +1,5 @@
 const clientService = require('../services/clientService');
+const photoService = require('../services/photoService');
 
 const clientController = {
   list(req, res, next) {
@@ -41,6 +42,27 @@ const clientController = {
     try {
       clientService.deleteClient(req.params.id);
       res.status(204).send();
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  uploadPhoto(req, res, next) {
+    try {
+      const client = clientService.uploadPhoto(req.params.id, req.file);
+      res.json({ client: client.toJSON() });
+    } catch (err) {
+      if (req.file) {
+        photoService.deleteFile(`clients/${req.file.filename}`);
+      }
+      next(err);
+    }
+  },
+
+  removePhoto(req, res, next) {
+    try {
+      const client = clientService.removePhoto(req.params.id);
+      res.json({ client: client.toJSON() });
     } catch (err) {
       next(err);
     }

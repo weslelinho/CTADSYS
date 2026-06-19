@@ -8,6 +8,8 @@ const cookieParser = require('cookie-parser');
 
 const { initializeDatabaseAsync } = require('./src/config/database');
 const { validateAuthConfig } = require('./src/config/auth');
+const { ensureUploadDirs, uploadsRoot } = require('./src/config/uploads');
+const { authenticate } = require('./src/middleware/auth');
 const routes = require('./src/routes');
 const { notFound, errorHandler } = require('./src/middleware/errorHandler');
 
@@ -15,6 +17,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 validateAuthConfig();
+ensureUploadDirs();
 
 initializeDatabaseAsync().then(() => {
   app.use(
@@ -24,7 +27,8 @@ initializeDatabaseAsync().then(() => {
           defaultSrc: ["'self'"],
           styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
           fontSrc: ["'self'", 'https://fonts.gstatic.com'],
-          imgSrc: ["'self'", 'data:', 'https:'],
+          imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
+          mediaSrc: ["'self'", 'blob:'],
           scriptSrc: ["'self'"],
           connectSrc: ["'self'"],
         },
@@ -36,6 +40,7 @@ initializeDatabaseAsync().then(() => {
   app.use(express.urlencoded({ extended: true }));
   app.use(cookieParser());
   app.use(express.static(path.join(__dirname, 'public')));
+  app.use('/uploads', authenticate, express.static(uploadsRoot));
 
   app.use(routes);
 

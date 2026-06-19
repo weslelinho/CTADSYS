@@ -12,6 +12,7 @@ class Client {
     this.admissionDate = data.admission_date || data.admissionDate;
     this.status = data.status || 'ativo';
     this.notes = data.notes;
+    this.photoPath = data.photo_path || data.photoPath || null;
     this.hidden = Boolean(data.hidden);
     this.createdBy = data.created_by || data.createdBy;
     this.createdAt = data.created_at || data.createdAt;
@@ -32,6 +33,7 @@ class Client {
       admissionDate: this.admissionDate,
       status: this.status,
       notes: this.notes,
+      photoPath: this.photoPath,
       createdBy: this.createdBy,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
