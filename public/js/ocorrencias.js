@@ -1,4 +1,7 @@
+const OCCURRENCES_PAGE_SIZE = 10;
+
 let occurrences = [];
+let occurrencesPage = 1;
 let editingOccurrenceId = null;
 let patientsForSelect = [];
 
@@ -14,7 +17,11 @@ const occurrenceClientSelect = document.getElementById('occurrence-client');
 
 document.addEventListener('DOMContentLoaded', () => {
   occurrenceForm.addEventListener('submit', handleOccurrenceSubmit);
-  occurrenceSearchInput.addEventListener('input', renderOccurrences);
+  occurrenceSearchInput.addEventListener('input', () => {
+    occurrencesPage = 1;
+    renderOccurrences();
+  });
+  document.addEventListener('click', handleOccurrencesPaginationClick);
   occurrencesTbody.addEventListener('click', handleOccurrenceTableClick);
   newOccurrenceBtn.addEventListener('click', openNewOccurrenceModal);
 
@@ -93,18 +100,29 @@ async function loadOccurrences() {
       <tr><td colspan="4">
         <div class="empty-state"><p>Erro ao carregar ocorrências.</p></div>
       </td></tr>`;
+    renderOccurrencesPagination(0, 0);
   }
 }
 
-function renderOccurrences() {
+function getFilteredOccurrences() {
   const query = occurrenceSearchInput.value.toLowerCase().trim();
-  const filtered = occurrences.filter((o) => {
+  return occurrences.filter((o) => {
     if (!query) return true;
     return (
       o.clientName.toLowerCase().includes(query) ||
       o.description.toLowerCase().includes(query)
     );
   });
+}
+
+function renderOccurrences() {
+  const query = occurrenceSearchInput.value.toLowerCase().trim();
+  const filtered = getFilteredOccurrences();
+  const totalPages = Math.max(1, Math.ceil(filtered.length / OCCURRENCES_PAGE_SIZE));
+
+  if (occurrencesPage > totalPages) {
+    occurrencesPage = totalPages;
+  }
 
   if (filtered.length === 0) {
     occurrencesTbody.innerHTML = `
@@ -114,10 +132,14 @@ function renderOccurrences() {
           <p>${query ? 'Nenhuma ocorrência encontrada.' : 'Nenhuma ocorrência registrada ainda.'}</p>
         </div>
       </td></tr>`;
+    renderOccurrencesPagination(0, 0);
     return;
   }
 
-  occurrencesTbody.innerHTML = filtered
+  const start = (occurrencesPage - 1) * OCCURRENCES_PAGE_SIZE;
+  const pageItems = filtered.slice(start, start + OCCURRENCES_PAGE_SIZE);
+
+  occurrencesTbody.innerHTML = pageItems
     .map(
       (o) => `
     <tr>
@@ -133,6 +155,96 @@ function renderOccurrences() {
     </tr>`
     )
     .join('');
+
+  renderOccurrencesPagination(filtered.length, totalPages);
+}
+
+function getOccurrencesPaginationEl() {
+  let el = document.getElementById('occurrences-pagination');
+  if (el || !occurrencesTbody) return el;
+
+  const card = occurrencesTbody.closest('.card');
+  if (!card) return null;
+
+  el = document.createElement('div');
+  el.id = 'occurrences-pagination';
+  el.className = 'pagination-bar';
+  el.hidden = true;
+  card.appendChild(el);
+  return el;
+}
+
+function renderOccurrencesPagination(totalItems, totalPages) {
+  const occurrencesPaginationEl = getOccurrencesPaginationEl();
+  if (!occurrencesPaginationEl) return;
+
+  if (totalItems === 0) {
+    occurrencesPaginationEl.hidden = true;
+    occurrencesPaginationEl.innerHTML = '';
+    return;
+  }
+
+  occurrencesPaginationEl.hidden = false;
+  const start = (occurrencesPage - 1) * OCCURRENCES_PAGE_SIZE + 1;
+  const end = Math.min(occurrencesPage * OCCURRENCES_PAGE_SIZE, totalItems);
+
+  occurrencesPaginationEl.innerHTML = `
+    <div class="pagination">
+      <p class="pagination__info">Mostrando ${start}–${end} de ${totalItems} ocorrência${totalItems === 1 ? '' : 's'}</p>
+      ${
+        totalPages > 1
+          ? `<div class="pagination__controls">
+        <button type="button" class="btn btn--outline btn--sm" data-occurrences-page="prev" ${occurrencesPage === 1 ? 'disabled' : ''}>Anterior</button>
+        <span class="pagination__pages">${renderOccurrencesPageButtons(totalPages)}</span>
+        <button type="button" class="btn btn--outline btn--sm" data-occurrences-page="next" ${occurrencesPage === totalPages ? 'disabled' : ''}>Próxima</button>
+      </div>`
+          : ''
+      }
+    </div>`;
+}
+
+function renderOccurrencesPageButtons(totalPages) {
+  const pages = [];
+  const addPage = (page) => {
+    const isActive = page === occurrencesPage;
+    pages.push(
+      `<button type="button" class="pagination__page${isActive ? ' pagination__page--active' : ''}" data-occurrences-page="${page}"${isActive ? ' aria-current="page"' : ''}>${page}</button>`
+    );
+  };
+  const addEllipsis = () => {
+    pages.push('<span class="pagination__ellipsis">…</span>');
+  };
+
+  if (totalPages <= 7) {
+    for (let i = 1; i <= totalPages; i++) addPage(i);
+    return pages.join('');
+  }
+
+  addPage(1);
+
+  if (occurrencesPage > 3) addEllipsis();
+
+  const rangeStart = Math.max(2, occurrencesPage - 1);
+  const rangeEnd = Math.min(totalPages - 1, occurrencesPage + 1);
+
+  for (let i = rangeStart; i <= rangeEnd; i++) addPage(i);
+
+  if (occurrencesPage < totalPages - 2) addEllipsis();
+
+  addPage(totalPages);
+  return pages.join('');
+}
+
+function handleOccurrencesPaginationClick(e) {
+  const btn = e.target.closest('[data-occurrences-page]');
+  if (!btn || btn.disabled || !btn.closest('#occurrences-pagination')) return;
+
+  const action = btn.dataset.occurrencesPage;
+  if (action === 'prev') occurrencesPage -= 1;
+  else if (action === 'next') occurrencesPage += 1;
+  else occurrencesPage = Number(action);
+
+  renderOccurrences();
 }
 
 function truncateText(text, max) {
@@ -229,6 +341,7 @@ async function handleOccurrenceSubmit(e) {
       occurrences[idx] = result.occurrence;
     } else {
       occurrences.unshift(result.occurrence);
+      occurrencesPage = 1;
     }
 
     renderOccurrences();
