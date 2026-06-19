@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   form.addEventListener('submit', handleSubmit);
   searchInput.addEventListener('input', renderClients);
+  tbody.addEventListener('click', handleTableClick);
   newPatientBtn.addEventListener('click', openNewPatientModal);
   confirmDeleteBtn.addEventListener('click', confirmDeletePatient);
 
@@ -83,8 +84,8 @@ function renderClients() {
       <td><span class="status-badge status-badge--${c.status}">${capitalize(c.status)}</span></td>
       <td>
         <div class="table-actions">
-          <button class="btn btn--outline btn--sm" onclick="editClient(${c.id})">Editar</button>
-          <button class="btn btn--danger btn--sm" onclick="openDeleteModal(${c.id})">Excluir</button>
+          <button type="button" class="btn btn--outline btn--sm" data-action="edit" data-id="${c.id}">Editar</button>
+          <button type="button" class="btn btn--danger btn--sm" data-action="delete" data-id="${c.id}">Excluir</button>
         </div>
       </td>
     </tr>`
@@ -120,6 +121,15 @@ function closeModal() {
     document.body.classList.remove('modal-open');
   }
   resetForm();
+}
+
+function handleTableClick(e) {
+  const btn = e.target.closest('[data-action]');
+  if (!btn) return;
+
+  const id = Number(btn.dataset.id);
+  if (btn.dataset.action === 'edit') editClient(id);
+  if (btn.dataset.action === 'delete') openDeleteModal(id);
 }
 
 function openDeleteModal(id) {
@@ -307,5 +317,3 @@ function formatPhone(e) {
   e.target.value = v;
 }
 
-window.editClient = editClient;
-window.openDeleteModal = openDeleteModal;
