@@ -5,7 +5,7 @@ const authController = {
   async login(req, res, next) {
     try {
       const { username, password } = req.body;
-      const { user, token } = await authService.login(username, password);
+      const { user, token } = await authService.login(username, password, req);
 
       res.cookie(authConfig.jwt.cookieName, token, {
         httpOnly: true,
@@ -21,6 +21,21 @@ const authController = {
   },
 
   logout(req, res) {
+    const token =
+      req.cookies[authConfig.jwt.cookieName] ||
+      (req.headers.authorization && req.headers.authorization.replace('Bearer ', ''));
+
+    if (token) {
+      try {
+        const user = authService.getUserFromToken(token);
+        if (user) {
+          authService.logLogout(user.id, req);
+        }
+      } catch {
+        // Token invalid or expired — skip audit log
+      }
+    }
+
     res.clearCookie(authConfig.jwt.cookieName);
     if (req.path.startsWith('/api') || req.headers.accept?.includes('application/json')) {
       return res.json({ message: 'Logout realizado' });

@@ -2,6 +2,7 @@ const express = require('express');
 const authRoutes = require('./authRoutes');
 const clientRoutes = require('./clientRoutes');
 const occurrenceRoutes = require('./occurrenceRoutes');
+const auditRoutes = require('./auditRoutes');
 const landingController = require('../controllers/landingController');
 const { authenticatePage } = require('../middleware/auth');
 
@@ -13,5 +14,6 @@ router.get('/cadastro', authenticatePage, landingController.registerPage);
 router.use('/auth', authRoutes);
 router.use('/api/clients', clientRoutes);
 router.use('/api/occurrences', occurrenceRoutes);
+router.use('/api/audit-logs', auditRoutes);
 
 module.exports = router;

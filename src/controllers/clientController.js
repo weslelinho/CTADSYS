@@ -22,7 +22,7 @@ const clientController = {
 
   create(req, res, next) {
     try {
-      const client = clientService.createClient(req.body, req.user.id);
+      const client = clientService.createClient(req.body, req.user.id, req);
       res.status(201).json({ client: client.toJSON() });
     } catch (err) {
       next(err);
@@ -31,7 +31,7 @@ const clientController = {
 
   update(req, res, next) {
     try {
-      const client = clientService.updateClient(req.params.id, req.body);
+      const client = clientService.updateClient(req.params.id, req.body, req.user.id, req);
       res.json({ client: client.toJSON() });
     } catch (err) {
       next(err);
@@ -40,7 +40,7 @@ const clientController = {
 
   remove(req, res, next) {
     try {
-      clientService.deleteClient(req.params.id);
+      clientService.deleteClient(req.params.id, req.user.id, req);
       res.status(204).send();
     } catch (err) {
       next(err);
@@ -49,7 +49,7 @@ const clientController = {
 
   uploadPhoto(req, res, next) {
     try {
-      const client = clientService.uploadPhoto(req.params.id, req.file);
+      const client = clientService.uploadPhoto(req.params.id, req.file, req.user.id, req);
       res.json({ client: client.toJSON() });
     } catch (err) {
       if (req.file) {
@@ -61,7 +61,7 @@ const clientController = {
 
   removePhoto(req, res, next) {
     try {
-      const client = clientService.removePhoto(req.params.id);
+      const client = clientService.removePhoto(req.params.id, req.user.id, req);
       res.json({ client: client.toJSON() });
     } catch (err) {
       next(err);

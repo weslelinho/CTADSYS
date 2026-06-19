@@ -23,6 +23,10 @@
           <span class="sidebar__icon">📝</span>
           Ocorrências
         </a>
+        <a href="#" class="sidebar__link" data-page="historico">
+          <span class="sidebar__icon">📋</span>
+          Histórico
+        </a>
       </nav>
 
       <div class="sidebar__footer">
@@ -113,6 +117,53 @@
           </div>
 
           <div id="occurrences-pagination" class="pagination-bar" hidden></div>
+        </div>
+      </section>
+
+      <section class="admin-content admin-page" id="page-historico" hidden>
+        <div class="card">
+          <div class="card__toolbar">
+            <div class="search-bar">
+              <input type="search" id="audit-search-input" placeholder="Buscar por usuário, ação ou detalhes...">
+            </div>
+            <select id="audit-filter-select" class="form-control form-control--inline" aria-label="Filtrar por tipo de ação">
+              <option value="">Todas as ações</option>
+              <option value="client.create">Paciente criado</option>
+              <option value="client.update">Paciente atualizado</option>
+              <option value="client.delete">Paciente excluído</option>
+              <option value="occurrence.create">Ocorrência criada</option>
+              <option value="occurrence.update">Ocorrência atualizada</option>
+              <option value="occurrence.delete">Ocorrência excluída</option>
+              <option value="auth.login">Login</option>
+              <option value="auth.logout">Logout</option>
+            </select>
+          </div>
+
+          <div class="table-wrapper">
+            <table class="clients-table">
+              <thead>
+                <tr>
+                  <th>Data e Hora</th>
+                  <th>Usuário</th>
+                  <th>Ação</th>
+                  <th>Registro</th>
+                  <th>Detalhes</th>
+                </tr>
+              </thead>
+              <tbody id="audit-tbody">
+                <tr>
+                  <td colspan="5">
+                    <div class="empty-state">
+                      <div class="empty-state__icon">📋</div>
+                      <p>Carregando histórico...</p>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div id="audit-pagination" class="pagination-bar" hidden></div>
         </div>
       </section>
     </div>
@@ -304,5 +355,6 @@
   <script src="/js/admin.js"></script>
   <script src="/js/cadastro.js?v=2"></script>
   <script src="/js/ocorrencias.js?v=3"></script>
+  <script src="/js/historico.js"></script>
 </body>
 </html>

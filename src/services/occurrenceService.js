@@ -1,5 +1,6 @@
 const clientRepository = require('../repositories/clientRepository');
 const occurrenceRepository = require('../repositories/occurrenceRepository');
+const auditService = require('./auditService');
 
 function normalizeDateTime(value) {
   if (!value) return null;
@@ -21,7 +22,7 @@ const occurrenceService = {
     return occurrence;
   },
 
-  createOccurrence(data, userId) {
+  createOccurrence(data, userId, req) {
     if (!data.clientId) {
       const error = new Error('Paciente é obrigatório');
       error.status = 400;
@@ -43,15 +44,26 @@ const occurrenceService = {
 
     const occurredAt = normalizeDateTime(data.occurredAt) || new Date().toISOString().slice(0, 19).replace('T', ' ');
 
-    return occurrenceRepository.create({
+    const occurrence = occurrenceRepository.create({
       clientId: data.clientId,
       description: data.description.trim(),
       occurredAt,
       createdBy: userId,
     });
+
+    auditService.log({
+      userId,
+      action: auditService.ACTIONS.OCCURRENCE_CREATE,
+      entityType: 'occurrence',
+      entityId: occurrence.id,
+      newValues: occurrence,
+      req,
+    });
+
+    return occurrence;
   },
 
-  updateOccurrence(id, data) {
+  updateOccurrence(id, data, userId, req) {
     const existing = this.getOccurrence(id);
 
     if (!data.clientId) {
@@ -83,16 +95,39 @@ const occurrenceService = {
       throw error;
     }
 
-    return occurrenceRepository.update(id, {
+    const occurrence = occurrenceRepository.update(id, {
       clientId,
       description: data.description.trim(),
       occurredAt,
     });
+
+    auditService.log({
+      userId,
+      action: auditService.ACTIONS.OCCURRENCE_UPDATE,
+      entityType: 'occurrence',
+      entityId: occurrence.id,
+      oldValues: existing,
+      newValues: occurrence,
+      req,
+    });
+
+    return occurrence;
   },
 
-  deleteOccurrence(id) {
-    this.getOccurrence(id);
-    return occurrenceRepository.delete(id);
+  deleteOccurrence(id, userId, req) {
+    const existing = this.getOccurrence(id);
+    occurrenceRepository.delete(id);
+
+    auditService.log({
+      userId,
+      action: auditService.ACTIONS.OCCURRENCE_DELETE,
+      entityType: 'occurrence',
+      entityId: Number(id),
+      oldValues: existing,
+      req,
+    });
+
+    return true;
   },
 };
 

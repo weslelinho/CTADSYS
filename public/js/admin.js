@@ -1,6 +1,7 @@
 const PAGE_CONFIG = {
   pacientes: { title: 'Pacientes' },
   ocorrencias: { title: 'Ocorrências' },
+  historico: { title: 'Histórico de Transações' },
 };
 
 let currentPage = 'pacientes';
@@ -47,6 +48,10 @@ function navigateToPage(page) {
 
   if (page === 'ocorrencias' && window.Occurrences?.onPageShow) {
     window.Occurrences.onPageShow();
+  }
+
+  if (page === 'historico' && window.AuditHistory?.onPageShow) {
+    window.AuditHistory.onPageShow();
   }
 }
 
