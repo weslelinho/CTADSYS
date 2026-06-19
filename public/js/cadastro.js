@@ -1,4 +1,7 @@
+const PAGE_SIZE = 10;
+
 let clients = [];
+let clientsPage = 1;
 let editingId = null;
 let deletingId = null;
 let pendingPhotoFile = null;
@@ -12,6 +15,7 @@ const formAlert = document.getElementById('form-alert');
 const submitBtn = document.getElementById('submit-btn');
 const searchInput = document.getElementById('search-input');
 const tbody = document.getElementById('clients-tbody');
+const paginationEl = document.getElementById('clients-pagination');
 const modal = document.getElementById('patient-modal');
 const deleteModal = document.getElementById('delete-patient-modal');
 const deleteConfirmMessage = document.getElementById('delete-confirm-message');
@@ -36,7 +40,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadClients();
 
   form.addEventListener('submit', handleSubmit);
-  searchInput.addEventListener('input', renderClients);
+  searchInput.addEventListener('input', () => {
+    clientsPage = 1;
+    renderClients();
+  });
+  if (paginationEl) {
+    paginationEl.addEventListener('click', handlePaginationClick);
+  }
   tbody.addEventListener('click', handleTableClick);
   newPatientBtn.addEventListener('click', openNewPatientModal);
   confirmDeleteBtn.addEventListener('click', confirmDeletePatient);
@@ -69,13 +79,16 @@ async function loadClients() {
     if (!res.ok) throw new Error('Failed to load');
     const data = await res.json();
     clients = data.clients;
-    renderClients();
   } catch {
     tbody.innerHTML = `
       <tr><td colspan="6">
         <div class="empty-state"><p>Erro ao carregar pacientes.</p></div>
       </td></tr>`;
+    renderPagination(0, 0);
+    return;
   }
+
+  renderClients();
 }
 
 function getPhotoUrl(photoPath) {
@@ -90,9 +103,9 @@ function renderPhotoThumb(photoPath) {
   return `<span class="patient-photo-thumb patient-photo-thumb--empty">👤</span>`;
 }
 
-function renderClients() {
+function getFilteredClients() {
   const query = searchInput.value.toLowerCase().trim();
-  const filtered = clients.filter((c) => {
+  return clients.filter((c) => {
     if (!query) return true;
     return (
       c.fullName.toLowerCase().includes(query) ||
@@ -100,6 +113,16 @@ function renderClients() {
       (c.phone && c.phone.includes(query))
     );
   });
+}
+
+function renderClients() {
+  const query = searchInput.value.toLowerCase().trim();
+  const filtered = getFilteredClients();
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+
+  if (clientsPage > totalPages) {
+    clientsPage = totalPages;
+  }
 
   if (filtered.length === 0) {
     tbody.innerHTML = `
@@ -109,10 +132,14 @@ function renderClients() {
           <p>${query ? 'Nenhum paciente encontrado.' : 'Nenhum paciente cadastrado ainda.'}</p>
         </div>
       </td></tr>`;
+    renderPagination(0, 0);
     return;
   }
 
-  tbody.innerHTML = filtered
+  const start = (clientsPage - 1) * PAGE_SIZE;
+  const pageItems = filtered.slice(start, start + PAGE_SIZE);
+
+  tbody.innerHTML = pageItems
     .map(
       (c) => `
     <tr>
@@ -130,6 +157,80 @@ function renderClients() {
     </tr>`
     )
     .join('');
+
+  renderPagination(filtered.length, totalPages);
+}
+
+function renderPagination(totalItems, totalPages) {
+  if (!paginationEl) return;
+
+  if (totalItems === 0) {
+    paginationEl.hidden = true;
+    paginationEl.innerHTML = '';
+    return;
+  }
+
+  paginationEl.hidden = false;
+  const start = (clientsPage - 1) * PAGE_SIZE + 1;
+  const end = Math.min(clientsPage * PAGE_SIZE, totalItems);
+
+  paginationEl.innerHTML = `
+    <div class="pagination">
+      <p class="pagination__info">Mostrando ${start}–${end} de ${totalItems} paciente${totalItems === 1 ? '' : 's'}</p>
+      ${
+        totalPages > 1
+          ? `<div class="pagination__controls">
+        <button type="button" class="btn btn--outline btn--sm" data-clients-page="prev" ${clientsPage === 1 ? 'disabled' : ''}>Anterior</button>
+        <span class="pagination__pages">${renderPageButtons(totalPages)}</span>
+        <button type="button" class="btn btn--outline btn--sm" data-clients-page="next" ${clientsPage === totalPages ? 'disabled' : ''}>Próxima</button>
+      </div>`
+          : ''
+      }
+    </div>`;
+}
+
+function renderPageButtons(totalPages) {
+  const pages = [];
+  const addPage = (page) => {
+    const isActive = page === clientsPage;
+    pages.push(
+      `<button type="button" class="pagination__page${isActive ? ' pagination__page--active' : ''}" data-clients-page="${page}"${isActive ? ' aria-current="page"' : ''}>${page}</button>`
+    );
+  };
+  const addEllipsis = () => {
+    pages.push('<span class="pagination__ellipsis">…</span>');
+  };
+
+  if (totalPages <= 7) {
+    for (let i = 1; i <= totalPages; i++) addPage(i);
+    return pages.join('');
+  }
+
+  addPage(1);
+
+  if (clientsPage > 3) addEllipsis();
+
+  const rangeStart = Math.max(2, clientsPage - 1);
+  const rangeEnd = Math.min(totalPages - 1, clientsPage + 1);
+
+  for (let i = rangeStart; i <= rangeEnd; i++) addPage(i);
+
+  if (clientsPage < totalPages - 2) addEllipsis();
+
+  addPage(totalPages);
+  return pages.join('');
+}
+
+function handlePaginationClick(e) {
+  const btn = e.target.closest('[data-clients-page]');
+  if (!btn || btn.disabled) return;
+
+  const action = btn.dataset.clientsPage;
+  if (action === 'prev') clientsPage -= 1;
+  else if (action === 'next') clientsPage += 1;
+  else clientsPage = Number(action);
+
+  renderClients();
 }
 
 function fillPatientForm(client) {
@@ -410,6 +511,7 @@ async function handleSubmit(e) {
       clients[idx] = savedClient;
     } else {
       clients.unshift(savedClient);
+      clientsPage = 1;
     }
 
     renderClients();
