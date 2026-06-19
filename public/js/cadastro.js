@@ -1,6 +1,10 @@
 let clients = [];
 let editingId = null;
 let deletingId = null;
+let pendingPhotoFile = null;
+let photoRemoved = false;
+let currentPhotoPath = null;
+let cameraStream = null;
 
 const form = document.getElementById('client-form');
 const formTitle = document.getElementById('form-title');
@@ -15,6 +19,19 @@ const deleteAlert = document.getElementById('delete-alert');
 const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
 const newPatientBtn = document.getElementById('new-patient-btn');
 
+const photoFileInput = document.getElementById('photo-file-input');
+const photoFileBtn = document.getElementById('photo-file-btn');
+const photoCameraBtn = document.getElementById('photo-camera-btn');
+const photoRemoveBtn = document.getElementById('photo-remove-btn');
+const photoPreviewImg = document.getElementById('photo-preview-img');
+const photoPlaceholder = document.getElementById('photo-placeholder');
+
+const cameraModal = document.getElementById('camera-modal');
+const cameraVideo = document.getElementById('camera-video');
+const cameraCanvas = document.getElementById('camera-canvas');
+const cameraCaptureBtn = document.getElementById('camera-capture-btn');
+const cameraAlert = document.getElementById('camera-alert');
+
 document.addEventListener('DOMContentLoaded', async () => {
   await loadClients();
 
@@ -27,12 +44,22 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('cpf').addEventListener('input', formatCpf);
   document.getElementById('phone').addEventListener('input', formatPhone);
 
+  photoFileBtn.addEventListener('click', () => photoFileInput.click());
+  photoFileInput.addEventListener('change', handlePhotoFileSelect);
+  photoCameraBtn.addEventListener('click', openCameraModal);
+  photoRemoveBtn.addEventListener('click', removePhoto);
+  cameraCaptureBtn.addEventListener('click', capturePhoto);
+
   modal.querySelectorAll('[data-close-patient-modal]').forEach((el) => {
     el.addEventListener('click', closeModal);
   });
 
   deleteModal.querySelectorAll('[data-close-delete-modal]').forEach((el) => {
     el.addEventListener('click', closeDeleteModal);
+  });
+
+  cameraModal.querySelectorAll('[data-close-camera-modal]').forEach((el) => {
+    el.addEventListener('click', closeCameraModal);
   });
 });
 
@@ -49,6 +76,18 @@ async function loadClients() {
         <div class="empty-state"><p>Erro ao carregar pacientes.</p></div>
       </td></tr>`;
   }
+}
+
+function getPhotoUrl(photoPath) {
+  if (!photoPath) return null;
+  return `/uploads/${photoPath}`;
+}
+
+function renderPhotoThumb(photoPath) {
+  if (photoPath) {
+    return `<img class="patient-photo-thumb" src="${getPhotoUrl(photoPath)}" alt="">`;
+  }
+  return `<span class="patient-photo-thumb patient-photo-thumb--empty">👤</span>`;
 }
 
 function renderClients() {
@@ -77,7 +116,7 @@ function renderClients() {
     .map(
       (c) => `
     <tr>
-      <td><strong>${Admin.escapeHtml(c.fullName)}</strong></td>
+      <td>${renderPhotoThumb(c.photoPath)}<strong>${Admin.escapeHtml(c.fullName)}</strong></td>
       <td>${Admin.escapeHtml(c.cpf || '—')}</td>
       <td>${Admin.escapeHtml(c.phone || '—')}</td>
       <td>${Admin.formatDate(c.admissionDate)}</td>
@@ -106,6 +145,153 @@ function fillPatientForm(client) {
   document.getElementById('admissionDate').value = client.admissionDate || '';
   document.getElementById('status').value = client.status || 'ativo';
   document.getElementById('notes').value = client.notes || '';
+  setPhotoPreview(client.photoPath);
+}
+
+function setPhotoPreview(photoPath) {
+  currentPhotoPath = photoPath || null;
+  pendingPhotoFile = null;
+  photoRemoved = false;
+  photoFileInput.value = '';
+
+  if (photoPath) {
+    photoPreviewImg.src = getPhotoUrl(photoPath);
+    photoPreviewImg.hidden = false;
+    photoPlaceholder.hidden = true;
+    photoRemoveBtn.hidden = false;
+  } else {
+    photoPreviewImg.src = '';
+    photoPreviewImg.hidden = true;
+    photoPlaceholder.hidden = false;
+    photoRemoveBtn.hidden = true;
+  }
+}
+
+function showLocalPhotoPreview(file) {
+  const url = URL.createObjectURL(file);
+  photoPreviewImg.src = url;
+  photoPreviewImg.hidden = false;
+  photoPlaceholder.hidden = true;
+  photoRemoveBtn.hidden = false;
+  photoPreviewImg.onload = () => URL.revokeObjectURL(url);
+}
+
+function handlePhotoFileSelect(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  if (!file.type.startsWith('image/')) {
+    showAlert('Selecione um arquivo de imagem válido.', 'error');
+    photoFileInput.value = '';
+    return;
+  }
+
+  pendingPhotoFile = file;
+  photoRemoved = false;
+  showLocalPhotoPreview(file);
+}
+
+function removePhoto() {
+  pendingPhotoFile = null;
+  photoFileInput.value = '';
+  photoRemoved = Boolean(currentPhotoPath);
+  photoPreviewImg.src = '';
+  photoPreviewImg.hidden = true;
+  photoPlaceholder.hidden = false;
+  photoRemoveBtn.hidden = true;
+}
+
+function resetPhotoState() {
+  pendingPhotoFile = null;
+  photoRemoved = false;
+  currentPhotoPath = null;
+  photoFileInput.value = '';
+  photoPreviewImg.src = '';
+  photoPreviewImg.hidden = true;
+  photoPlaceholder.hidden = false;
+  photoRemoveBtn.hidden = true;
+}
+
+async function openCameraModal() {
+  hideCameraAlert();
+  cameraModal.classList.add('modal--open');
+  cameraModal.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('modal-open');
+
+  try {
+    cameraStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 960 } },
+      audio: false,
+    });
+    cameraVideo.srcObject = cameraStream;
+  } catch {
+    showCameraAlert('Não foi possível acessar a câmera. Verifique as permissões do navegador.', 'error');
+    cameraCaptureBtn.disabled = true;
+  }
+}
+
+function closeCameraModal() {
+  stopCamera();
+  cameraModal.classList.remove('modal--open');
+  cameraModal.setAttribute('aria-hidden', 'true');
+  cameraCaptureBtn.disabled = false;
+  hideCameraAlert();
+  if (!modal.classList.contains('modal--open') && !deleteModal.classList.contains('modal--open')) {
+    document.body.classList.remove('modal-open');
+  }
+}
+
+function stopCamera() {
+  if (cameraStream) {
+    cameraStream.getTracks().forEach((track) => track.stop());
+    cameraStream = null;
+  }
+  cameraVideo.srcObject = null;
+}
+
+function capturePhoto() {
+  const width = cameraVideo.videoWidth;
+  const height = cameraVideo.videoHeight;
+  if (!width || !height) return;
+
+  cameraCanvas.width = width;
+  cameraCanvas.height = height;
+  cameraCanvas.getContext('2d').drawImage(cameraVideo, 0, 0, width, height);
+
+  cameraCanvas.toBlob(
+    (blob) => {
+      if (!blob) return;
+      pendingPhotoFile = new File([blob], `captura-${Date.now()}.jpg`, { type: 'image/jpeg' });
+      photoRemoved = false;
+      showLocalPhotoPreview(pendingPhotoFile);
+      closeCameraModal();
+    },
+    'image/jpeg',
+    0.9
+  );
+}
+
+async function uploadPhoto(clientId) {
+  if (!pendingPhotoFile) return null;
+
+  const formData = new FormData();
+  formData.append('photo', pendingPhotoFile);
+
+  const res = await fetch(`/api/clients/${clientId}/photo`, {
+    method: 'POST',
+    body: formData,
+  });
+
+  const result = await res.json();
+  if (!res.ok) throw new Error(result.error || 'Erro ao enviar foto');
+  return result.client;
+}
+
+async function deletePhotoOnServer(clientId) {
+  const res = await fetch(`/api/clients/${clientId}/photo`, { method: 'DELETE' });
+  const result = await res.json();
+  if (!res.ok) throw new Error(result.error || 'Erro ao remover foto');
+  return result.client;
 }
 
 function openModal() {
@@ -117,7 +303,7 @@ function openModal() {
 function closeModal() {
   modal.classList.remove('modal--open');
   modal.setAttribute('aria-hidden', 'true');
-  if (!deleteModal.classList.contains('modal--open')) {
+  if (!deleteModal.classList.contains('modal--open') && !cameraModal.classList.contains('modal--open')) {
     document.body.classList.remove('modal-open');
   }
   resetForm();
@@ -149,7 +335,7 @@ function closeDeleteModal() {
   deleteModal.setAttribute('aria-hidden', 'true');
   deletingId = null;
   hideDeleteAlert();
-  if (!modal.classList.contains('modal--open')) {
+  if (!modal.classList.contains('modal--open') && !cameraModal.classList.contains('modal--open')) {
     document.body.classList.remove('modal-open');
   }
 }
@@ -211,11 +397,19 @@ async function handleSubmit(e) {
     const result = await res.json();
     if (!res.ok) throw new Error(result.error || 'Erro ao salvar');
 
+    let savedClient = result.client;
+
+    if (pendingPhotoFile) {
+      savedClient = await uploadPhoto(savedClient.id);
+    } else if (isEditing && photoRemoved) {
+      savedClient = await deletePhotoOnServer(savedClient.id);
+    }
+
     if (isEditing) {
       const idx = clients.findIndex((c) => c.id === editingId);
-      clients[idx] = result.client;
+      clients[idx] = savedClient;
     } else {
-      clients.unshift(result.client);
+      clients.unshift(savedClient);
     }
 
     renderClients();
@@ -277,6 +471,7 @@ function resetForm() {
   formTitle.textContent = 'Novo Paciente';
   submitBtn.textContent = 'Salvar';
   hideAlert();
+  resetPhotoState();
 }
 
 function showAlert(message, type) {
@@ -286,6 +481,15 @@ function showAlert(message, type) {
 
 function hideAlert() {
   formAlert.className = 'alert';
+}
+
+function showCameraAlert(message, type) {
+  cameraAlert.textContent = message;
+  cameraAlert.className = `alert alert--visible alert--${type}`;
+}
+
+function hideCameraAlert() {
+  cameraAlert.className = 'alert';
 }
 
 function showDeleteAlert(message, type) {
@@ -316,4 +520,3 @@ function formatPhone(e) {
   else if (v.length > 2) v = v.replace(/(\d{2})(\d{0,5})/, '($1) $2');
   e.target.value = v;
 }
-

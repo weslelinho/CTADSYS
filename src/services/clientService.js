@@ -1,4 +1,5 @@
 const clientRepository = require('../repositories/clientRepository');
+const photoService = require('./photoService');
 
 const clientService = {
   listClients() {
@@ -52,6 +53,19 @@ const clientService = {
   deleteClient(id) {
     this.getClient(id);
     return clientRepository.softDelete(id);
+  },
+
+  uploadPhoto(clientId, file) {
+    if (!file) {
+      const error = new Error('Nenhuma imagem enviada');
+      error.status = 400;
+      throw error;
+    }
+    return photoService.saveClientPhoto(clientId, file);
+  },
+
+  removePhoto(clientId) {
+    return photoService.removeClientPhoto(clientId);
   },
 };
 

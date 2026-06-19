@@ -917,6 +917,79 @@ body.modal-open {
   margin-top: 1.5rem;
 }
 
+/* ── Photo Upload ── */
+.photo-upload__area {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.25rem;
+}
+
+.photo-upload__preview {
+  width: 120px;
+  height: 120px;
+  border-radius: 12px;
+  border: 2px dashed var(--color-border);
+  background: var(--color-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.photo-upload__placeholder {
+  font-size: 2.5rem;
+  opacity: 0.4;
+}
+
+.photo-upload__preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photo-upload__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-top: 0.25rem;
+}
+
+.camera-preview {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background: #000;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.camera-preview video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.patient-photo-thumb {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--color-border);
+  vertical-align: middle;
+  margin-right: 0.5rem;
+}
+
+.patient-photo-thumb--empty {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg);
+  font-size: 1rem;
+  color: var(--color-text-muted);
+}
+
 /* ── Table ── */
 .table-wrapper {
   overflow-x: auto;

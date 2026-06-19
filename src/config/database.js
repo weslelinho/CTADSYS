@@ -71,6 +71,7 @@ function initializeDatabase() {
 
   migrateUsersTable();
   migrateClientsHiddenColumn();
+  migrateClientsPhotoColumn();
   initializeOccurrencesTable(db);
 }
 
@@ -78,6 +79,13 @@ function migrateClientsHiddenColumn() {
   const columns = db.prepare('PRAGMA table_info(clients)').all().map((c) => c.name);
   if (!columns.includes('hidden')) {
     db.exec('ALTER TABLE clients ADD COLUMN hidden INTEGER NOT NULL DEFAULT 0');
+  }
+}
+
+function migrateClientsPhotoColumn() {
+  const columns = db.prepare('PRAGMA table_info(clients)').all().map((c) => c.name);
+  if (!columns.includes('photo_path')) {
+    db.exec('ALTER TABLE clients ADD COLUMN photo_path TEXT');
   }
 }
 

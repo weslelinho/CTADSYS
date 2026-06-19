@@ -127,6 +127,22 @@
         <form id="client-form" novalidate>
           <input type="hidden" id="client-id">
 
+          <div class="form-group photo-upload">
+            <label>Foto do Paciente</label>
+            <div class="photo-upload__area">
+              <div class="photo-upload__preview" id="photo-preview">
+                <span class="photo-upload__placeholder" id="photo-placeholder">📷</span>
+                <img id="photo-preview-img" src="" alt="Foto do paciente" hidden>
+              </div>
+              <div class="photo-upload__actions">
+                <input type="file" id="photo-file-input" accept="image/jpeg,image/png,image/gif,image/webp" hidden>
+                <button type="button" class="btn btn--outline btn--sm" id="photo-file-btn">Escolher arquivo</button>
+                <button type="button" class="btn btn--outline btn--sm" id="photo-camera-btn">Tirar foto</button>
+                <button type="button" class="btn btn--outline btn--sm btn--danger" id="photo-remove-btn" hidden>Remover foto</button>
+              </div>
+            </div>
+          </div>
+
           <div class="form-group">
             <label for="fullName">Nome Completo *</label>
             <input type="text" id="fullName" name="fullName" required placeholder="Nome completo do paciente">
@@ -256,6 +272,27 @@
             <button type="button" class="btn btn--outline" data-close-occurrence-modal>Cancelar</button>
           </div>
         </form>
+      </div>
+    </div>
+  </div>
+
+  <div id="camera-modal" class="modal" aria-hidden="true">
+    <div class="modal__backdrop" data-close-camera-modal></div>
+    <div class="modal__dialog modal__dialog--sm" role="dialog" aria-modal="true" aria-labelledby="camera-modal-title">
+      <div class="modal__header">
+        <h2 class="modal__title" id="camera-modal-title">Capturar Foto</h2>
+        <button type="button" class="modal__close" data-close-camera-modal aria-label="Fechar">&times;</button>
+      </div>
+      <div class="modal__body">
+        <div id="camera-alert" class="alert" role="alert"></div>
+        <div class="camera-preview">
+          <video id="camera-video" autoplay playsinline muted></video>
+          <canvas id="camera-canvas" hidden></canvas>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn--primary" id="camera-capture-btn">Capturar</button>
+          <button type="button" class="btn btn--outline" data-close-camera-modal>Cancelar</button>
+        </div>
       </div>
     </div>
   </div>

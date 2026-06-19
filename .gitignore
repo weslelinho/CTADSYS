@@ -3,3 +3,5 @@ database.sqlite
 database.sqlite-wal
 database.sqlite-shm
 .env
+uploads/clients/*
+!uploads/clients/.gitkeep

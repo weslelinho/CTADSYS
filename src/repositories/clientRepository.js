@@ -87,6 +87,13 @@ const clientRepository = {
       .run(id);
     return result.changes > 0;
   },
+
+  updatePhotoPath(id, photoPath) {
+    db.prepare(
+      `UPDATE clients SET photo_path = ?, updated_at = datetime('now') WHERE id = ? AND hidden = 0`
+    ).run(photoPath, id);
+    return this.findById(id);
+  },
 };
 
 module.exports = clientRepository;
