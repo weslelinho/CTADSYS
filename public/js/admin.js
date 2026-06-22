@@ -11,7 +11,6 @@ let currentUser = null;
 document.addEventListener('DOMContentLoaded', async () => {
   await loadUser();
   initNavigation();
-  initReportsPage();
 });
 
 async function loadUser() {
@@ -183,6 +182,7 @@ const Reports = (function createReportsModule() {
   let actionCheckboxes;
   let reportSearchInput;
   let clearBtn;
+  let generateBtn;
 
   function bindElements() {
     reportTbody = document.getElementById('report-tbody');
@@ -193,6 +193,7 @@ const Reports = (function createReportsModule() {
     actionCheckboxes = document.getElementById('report-action-checkboxes');
     reportSearchInput = document.getElementById('report-search-input');
     clearBtn = document.getElementById('report-clear-btn');
+    generateBtn = document.getElementById('report-generate-btn');
   }
 
   function getSelectedActions() {
@@ -302,22 +303,508 @@ const Reports = (function createReportsModule() {
   function getFilteredLogs() {
     if (!searchFilter) return reportLogs;
 
-    return reportLogs.filter((log) => {
-      const haystack = [
-        log.userName,
-        log.userUsername,
-        ACTION_LABELS[log.action] || log.action,
-        ENTITY_LABELS[log.entityType] || log.entityType,
-        log.entityId,
-        summarizeValues(log.newValues),
-        summarizeValues(log.oldValues),
-      ]
-        .filter(Boolean)
-        .join(' ')
-        .toLowerCase();
+    return reportLogs.filter((log) => logMatchesSearch(log));
+  }
 
-      return haystack.indexOf(searchFilter) !== -1;
+  function logMatchesSearch(log) {
+    if (!searchFilter) return true;
+
+    const haystack = [
+      log.userName,
+      log.userUsername,
+      ACTION_LABELS[log.action] || log.action,
+      ENTITY_LABELS[log.entityType] || log.entityType,
+      log.entityId,
+      summarizeValues(log.newValues),
+      summarizeValues(log.oldValues),
+    ]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase();
+
+    return haystack.indexOf(searchFilter) !== -1;
+  }
+
+  function buildReportQueryParams(limit, offset) {
+    const params = new URLSearchParams({
+      limit: String(limit),
+      offset: String(offset),
     });
+
+    if (clientSelect && clientSelect.value) params.set('clientId', clientSelect.value);
+    if (userSelect && userSelect.value) params.set('userId', userSelect.value);
+    if (dateFromInput && dateFromInput.value) params.set('dateFrom', dateFromInput.value);
+    if (dateToInput && dateToInput.value) params.set('dateTo', dateToInput.value);
+    getSelectedActions().forEach((action) => params.append('action', action));
+
+    return params;
+  }
+
+  async function fetchAllLogsForReport() {
+    const pageSize = 200;
+    let offset = 0;
+    let total = Infinity;
+    const allLogs = [];
+
+    while (offset < total) {
+      const params = buildReportQueryParams(pageSize, offset);
+      const res = await fetch(`/api/audit-logs?${params}`);
+      if (res.status === 401) {
+        window.location.href = '/?login=required';
+        return null;
+      }
+      if (!res.ok) {
+        throw new Error('request failed');
+      }
+
+      const data = await res.json();
+      const logs = Array.isArray(data.logs) ? data.logs : [];
+      allLogs.push(...logs);
+      total = Number(data.total) || 0;
+      offset += pageSize;
+
+      if (logs.length === 0) break;
+    }
+
+    return allLogs.filter((log) => logMatchesSearch(log));
+  }
+
+  function parseLogDate(dateTimeStr) {
+    if (!dateTimeStr) return 0;
+    const date = new Date(String(dateTimeStr).replace(' ', 'T'));
+    return Number.isNaN(date.getTime()) ? 0 : date.getTime();
+  }
+
+  function groupLogsByAction(logs) {
+    const groups = new Map();
+
+    logs.forEach((log) => {
+      const action = log.action || 'unknown';
+      if (!groups.has(action)) groups.set(action, []);
+      groups.get(action).push(log);
+    });
+
+    groups.forEach((groupLogs) => {
+      groupLogs.sort((a, b) => parseLogDate(a.createdAt) - parseLogDate(b.createdAt));
+    });
+
+    const ordered = [];
+    Object.keys(ACTION_LABELS).forEach((action) => {
+      if (groups.has(action)) {
+        ordered.push({
+          action,
+          label: ACTION_LABELS[action],
+          logs: groups.get(action),
+        });
+        groups.delete(action);
+      }
+    });
+
+    groups.forEach((groupLogs, action) => {
+      ordered.push({ action, label: action, logs: groupLogs });
+    });
+
+    return ordered;
+  }
+
+  function buildFilterSummary() {
+    const parts = [];
+
+    if (clientSelect && clientSelect.value) {
+      parts.push(`Paciente: ${clientSelect.options[clientSelect.selectedIndex].textContent}`);
+    }
+    if (userSelect && userSelect.value) {
+      parts.push(`Usuário: ${userSelect.options[userSelect.selectedIndex].textContent}`);
+    }
+    if (dateFromInput && dateFromInput.value) {
+      parts.push(`Período de: ${formatDate(dateFromInput.value)}`);
+    }
+    if (dateToInput && dateToInput.value) {
+      parts.push(`Período até: ${formatDate(dateToInput.value)}`);
+    }
+
+    const selectedActions = getSelectedActions();
+    if (selectedActions.length > 0) {
+      parts.push(
+        `Tipos de ação: ${selectedActions.map((action) => ACTION_LABELS[action] || action).join(', ')}`
+      );
+    }
+    if (searchFilter) {
+      parts.push(`Busca: "${searchFilter}"`);
+    }
+
+    return parts.length > 0 ? parts.join(' · ') : 'Todos os registros';
+  }
+
+  function buildPrintRow(log) {
+    const userLabel = log.userName
+      ? `${log.userName} (${log.userUsername || ''})`
+      : '—';
+    const entityLabel = log.entityType
+      ? `${ENTITY_LABELS[log.entityType] || log.entityType}${log.entityId ? ` #${log.entityId}` : ''}`
+      : '—';
+    const details = buildDetails(log) || '—';
+
+    return `
+      <tr>
+        <td>${escapeHtml(formatDateTime(log.createdAt))}</td>
+        <td>${escapeHtml(userLabel)}</td>
+        <td>${escapeHtml(entityLabel)}</td>
+        <td>${escapeHtml(details)}</td>
+      </tr>
+    `;
+  }
+
+  function buildLetterheadHtml(generatedAt, totalRecords) {
+    const logoUrl = `${window.location.origin}/images/logo.png`;
+    return `
+      <header class="letterhead">
+        <img src="${logoUrl}" alt="CTAD" class="letterhead__logo">
+        <p class="letterhead__org">Comunidade Terapêutica Amparados por Deus</p>
+        <h1 class="letterhead__title">Relatório de Auditoria</h1>
+        <div class="letterhead__meta">
+          <p>Gerado em: ${escapeHtml(generatedAt)}</p>
+          <p>Total de registros: ${totalRecords}</p>
+        </div>
+      </header>
+    `;
+  }
+
+  function buildPrintDocument(groups, totalRecords) {
+    const generatedAt = new Date().toLocaleString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+    const filterSummary = buildFilterSummary();
+    const letterheadHtml = buildLetterheadHtml(generatedAt, totalRecords);
+
+    const sectionsHtml = groups
+      .map(
+        (group) => `
+        <section class="report-group">
+          <h2 class="report-group__title">${escapeHtml(group.label)}</h2>
+          <p class="report-group__count">${group.logs.length} registro${group.logs.length === 1 ? '' : 's'}</p>
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th>Data e Hora</th>
+                <th>Usuário</th>
+                <th>Registro</th>
+                <th>Detalhes</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${group.logs.map((log) => buildPrintRow(log)).join('')}
+            </tbody>
+          </table>
+        </section>
+      `
+      )
+      .join('');
+
+    return `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Relatório de Auditoria — CTAD</title>
+  <style>
+    :root {
+      --color-primary: #1a6b5c;
+      --color-primary-dark: #0f4a40;
+      --color-text: #1e2d2a;
+      --color-text-muted: #5a6e69;
+      --color-border: #d4e0dc;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    @page {
+      size: A4;
+      margin: 12mm 14mm 16mm;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      color: var(--color-text);
+      line-height: 1.5;
+      font-size: 11pt;
+      background: #fff;
+    }
+
+    .print-document {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .print-document thead td,
+    .print-document tbody td,
+    .print-document tfoot td {
+      padding: 0;
+      vertical-align: top;
+    }
+
+    .letterhead {
+      text-align: center;
+      padding-bottom: 0.75rem;
+      border-bottom: 2px solid var(--color-primary);
+    }
+
+    .letterhead__logo {
+      width: 80px;
+      height: auto;
+      margin: 0 auto 0.5rem;
+    }
+
+    .letterhead__org {
+      font-size: 0.82rem;
+      color: var(--color-text-muted);
+      margin-bottom: 0.25rem;
+    }
+
+    .letterhead__title {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--color-primary-dark);
+      margin-bottom: 0.5rem;
+    }
+
+    .letterhead__meta {
+      font-size: 0.78rem;
+      color: var(--color-text-muted);
+    }
+
+    .letterhead__meta p + p {
+      margin-top: 0.2rem;
+    }
+
+    .print-document__body {
+      padding-top: 1rem;
+    }
+
+    .report-summary {
+      background: #f4f7f6;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      margin-bottom: 1.25rem;
+      font-size: 0.88rem;
+    }
+
+    .report-summary strong {
+      color: var(--color-primary-dark);
+    }
+
+    .report-group {
+      margin-bottom: 1.5rem;
+      page-break-inside: avoid;
+    }
+
+    .report-group__title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--color-primary-dark);
+      margin-bottom: 0.2rem;
+      padding-bottom: 0.35rem;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .report-group__count {
+      font-size: 0.78rem;
+      color: var(--color-text-muted);
+      margin-bottom: 0.6rem;
+    }
+
+    .report-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+
+    .report-table th,
+    .report-table td {
+      border: 1px solid var(--color-border);
+      padding: 0.45rem 0.55rem;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .report-table th {
+      background: #e8f2ef;
+      color: var(--color-primary-dark);
+      font-weight: 600;
+    }
+
+    .report-table tbody tr:nth-child(even) {
+      background: #fafcfc;
+    }
+
+    .print-document__footer {
+      padding-top: 0.5rem;
+      border-top: 1px solid var(--color-border);
+      text-align: center;
+      font-size: 0.72rem;
+      color: var(--color-text-muted);
+    }
+
+    .print-actions {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+      margin: 1.5rem 0 2rem;
+    }
+
+    .print-actions button {
+      font-family: inherit;
+      font-size: 0.9rem;
+      padding: 0.55rem 1.25rem;
+      border-radius: 8px;
+      cursor: pointer;
+      border: 1px solid var(--color-primary);
+    }
+
+    .print-actions button:first-child {
+      background: var(--color-primary);
+      color: #fff;
+    }
+
+    .print-actions button:last-child {
+      background: #fff;
+      color: var(--color-primary);
+    }
+
+    @media print {
+      .print-actions { display: none !important; }
+
+      .print-document thead {
+        display: table-header-group;
+      }
+
+      .print-document tfoot {
+        display: table-footer-group;
+      }
+
+      .report-table thead {
+        display: table-header-group;
+      }
+
+      .report-group {
+        page-break-inside: auto;
+      }
+
+      .report-group__title {
+        page-break-after: avoid;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="print-actions">
+    <button type="button" onclick="window.print()">Imprimir</button>
+    <button type="button" onclick="window.close()">Fechar</button>
+  </div>
+
+  <table class="print-document">
+    <thead>
+      <tr>
+        <td>${letterheadHtml}</td>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="print-document__body">
+          <div class="report-summary">
+            <strong>Filtros aplicados:</strong> ${escapeHtml(filterSummary)}
+          </div>
+          ${sectionsHtml}
+        </td>
+      </tr>
+    </tbody>
+    <tfoot>
+      <tr>
+        <td class="print-document__footer">
+          CTAD — Comunidade Terapêutica Amparados por Deus · Documento gerado pelo sistema
+        </td>
+      </tr>
+    </tfoot>
+  </table>
+</body>
+</html>`;
+  }
+
+  function openPrintReport(html) {
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const printWindow = window.open(url, '_blank');
+
+    if (!printWindow) {
+      URL.revokeObjectURL(url);
+      window.alert('Permita pop-ups neste site para gerar o relatório.');
+      return;
+    }
+
+    const cleanup = () => URL.revokeObjectURL(url);
+
+    const triggerPrint = () => {
+      printWindow.focus();
+      printWindow.print();
+      cleanup();
+    };
+
+    let ready = false;
+    const onReady = () => {
+      if (ready) return;
+      try {
+        const doc = printWindow.document;
+        if (!doc?.body?.innerHTML?.trim()) return;
+      } catch {
+        return;
+      }
+      ready = true;
+      const logo = printWindow.document.querySelector('.letterhead__logo');
+      if (logo && !logo.complete) {
+        logo.addEventListener('load', triggerPrint, { once: true });
+        logo.addEventListener('error', triggerPrint, { once: true });
+      } else {
+        setTimeout(triggerPrint, 300);
+      }
+    };
+
+    printWindow.addEventListener('load', onReady, { once: true });
+    setTimeout(onReady, 1500);
+  }
+
+  async function generateReport() {
+    bindElements();
+    if (!generateBtn) return;
+
+    const originalLabel = generateBtn.textContent;
+    generateBtn.disabled = true;
+    generateBtn.textContent = 'Gerando...';
+
+    try {
+      const logs = await fetchAllLogsForReport();
+      if (logs === null) return;
+
+      if (logs.length === 0) {
+        window.alert(
+          hasActiveFilters()
+            ? 'Nenhum registro encontrado para os filtros selecionados.'
+            : 'Nenhuma alteração registrada para gerar o relatório.'
+        );
+        return;
+      }
+
+      const groups = groupLogsByAction(logs);
+      openPrintReport(buildPrintDocument(groups, logs.length));
+    } catch {
+      window.alert('Erro ao gerar relatório. Verifique se o servidor está em execução.');
+    } finally {
+      generateBtn.disabled = false;
+      generateBtn.textContent = originalLabel;
+    }
   }
 
   function renderPagination(total) {
@@ -462,16 +949,7 @@ const Reports = (function createReportsModule() {
 
     showMessage('📊', 'Carregando relatório...');
 
-    const params = new URLSearchParams({
-      limit: String(REPORT_PAGE_SIZE),
-      offset: String((reportPage - 1) * REPORT_PAGE_SIZE),
-    });
-
-    if (clientSelect && clientSelect.value) params.set('clientId', clientSelect.value);
-    if (userSelect && userSelect.value) params.set('userId', userSelect.value);
-    if (dateFromInput && dateFromInput.value) params.set('dateFrom', dateFromInput.value);
-    if (dateToInput && dateToInput.value) params.set('dateTo', dateToInput.value);
-    getSelectedActions().forEach((action) => params.append('action', action));
+    const params = buildReportQueryParams(REPORT_PAGE_SIZE, (reportPage - 1) * REPORT_PAGE_SIZE);
 
     try {
       const res = await fetch(`/api/audit-logs?${params}`);
@@ -549,6 +1027,9 @@ const Reports = (function createReportsModule() {
     }
 
     clearBtn.addEventListener('click', clearFilters);
+    if (generateBtn) {
+      generateBtn.addEventListener('click', generateReport);
+    }
     document.addEventListener('click', handlePaginationClick);
     reportInitialized = true;
   }
