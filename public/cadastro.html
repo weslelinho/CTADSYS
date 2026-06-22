@@ -27,6 +27,10 @@
           <span class="sidebar__icon">📊</span>
           Relatórios
         </a>
+        <a href="#" class="sidebar__link" data-page="usuarios" id="nav-usuarios" hidden>
+          <span class="sidebar__icon">🔐</span>
+          Usuários
+        </a>
       </nav>
 
       <div class="sidebar__footer">
@@ -159,6 +163,9 @@
                   <option value="auth.login">Login</option>
                   <option value="auth.login.failed">Login falhou</option>
                   <option value="auth.logout">Logout</option>
+                  <option value="user.create">Usuário criado</option>
+                  <option value="user.password.update">Senha alterada</option>
+                  <option value="user.delete">Usuário excluído</option>
                 </select>
               </div>
             </div>
@@ -195,6 +202,42 @@
           </div>
 
           <div id="report-pagination" class="pagination-bar" hidden></div>
+        </div>
+      </section>
+
+      <section class="admin-content admin-page" id="page-usuarios" hidden>
+        <div class="card">
+          <div class="card__toolbar">
+            <div class="search-bar">
+              <input type="search" id="user-search-input" placeholder="Buscar por nome, usuário ou e-mail...">
+            </div>
+            <button type="button" class="btn btn--primary" id="new-user-btn">+ Novo Usuário</button>
+          </div>
+
+          <div class="table-wrapper">
+            <table class="clients-table">
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>Usuário</th>
+                  <th>E-mail</th>
+                  <th>Perfil</th>
+                  <th>Cadastro</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="users-tbody">
+                <tr>
+                  <td colspan="6">
+                    <div class="empty-state">
+                      <div class="empty-state__icon">🔐</div>
+                      <p>Carregando usuários...</p>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
     </div>
@@ -362,6 +405,109 @@
     </div>
   </div>
 
+  <div id="user-modal" class="modal" aria-hidden="true">
+    <div class="modal__backdrop" data-close-user-modal></div>
+    <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="user-form-title">
+      <div class="modal__header">
+        <h2 class="modal__title" id="user-form-title">Novo Usuário</h2>
+        <button type="button" class="modal__close" data-close-user-modal aria-label="Fechar">&times;</button>
+      </div>
+
+      <div class="modal__body">
+        <div id="user-form-alert" class="alert" role="alert"></div>
+        <form id="user-form" novalidate>
+          <div class="form-group">
+            <label for="user-name-input">Nome *</label>
+            <input type="text" id="user-name-input" name="name" required placeholder="Nome completo">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="user-username-input">Usuário (login) *</label>
+              <input type="text" id="user-username-input" name="username" required placeholder="login" autocomplete="off">
+            </div>
+            <div class="form-group">
+              <label for="user-role-input">Perfil</label>
+              <select id="user-role-input" name="role">
+                <option value="user">Usuário</option>
+                <option value="admin">Administrador</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="user-email-input">E-mail</label>
+            <input type="email" id="user-email-input" name="email" placeholder="email@exemplo.com">
+          </div>
+
+          <div class="form-group">
+            <label for="user-password-input">Senha *</label>
+            <input type="password" id="user-password-input" name="password" required placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn--primary" id="user-submit-btn">Criar usuário</button>
+            <button type="button" class="btn btn--outline" data-close-user-modal>Cancelar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div id="user-password-modal" class="modal" aria-hidden="true">
+    <div class="modal__backdrop" data-close-user-password-modal></div>
+    <div class="modal__dialog modal__dialog--sm" role="dialog" aria-modal="true" aria-labelledby="user-password-modal-title">
+      <div class="modal__header">
+        <h2 class="modal__title" id="user-password-modal-title">Alterar senha</h2>
+        <button type="button" class="modal__close" data-close-user-password-modal aria-label="Fechar">&times;</button>
+      </div>
+
+      <div class="modal__body">
+        <p class="confirm-message" id="user-password-target"></p>
+        <div id="user-password-alert" class="alert" role="alert"></div>
+        <form id="user-password-form" novalidate>
+          <div class="form-group">
+            <label for="user-new-password-input">Nova senha *</label>
+            <input type="password" id="user-new-password-input" name="password" required placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+          </div>
+
+          <div class="form-group">
+            <label for="user-confirm-password-input">Confirmar nova senha *</label>
+            <input type="password" id="user-confirm-password-input" required placeholder="Repita a nova senha" autocomplete="new-password">
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn--primary" id="user-password-submit-btn">Salvar senha</button>
+            <button type="button" class="btn btn--outline" data-close-user-password-modal>Cancelar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div id="delete-user-modal" class="modal" aria-hidden="true">
+    <div class="modal__backdrop" data-close-delete-user-modal></div>
+    <div class="modal__dialog modal__dialog--sm" role="dialog" aria-modal="true" aria-labelledby="delete-user-modal-title">
+      <div class="modal__header">
+        <h2 class="modal__title" id="delete-user-modal-title">Confirmar exclusão</h2>
+        <button type="button" class="modal__close" data-close-delete-user-modal aria-label="Fechar">&times;</button>
+      </div>
+      <div class="modal__body">
+        <p class="confirm-message" id="delete-user-confirm-message">
+          Tem certeza que deseja excluir este usuário?
+        </p>
+        <p class="confirm-hint">
+          O usuário será removido permanentemente do sistema.
+        </p>
+        <div id="delete-user-alert" class="alert" role="alert"></div>
+        <div class="form-actions">
+          <button type="button" class="btn btn--danger" id="confirm-delete-user-btn">Excluir usuário</button>
+          <button type="button" class="btn btn--outline" data-close-delete-user-modal>Cancelar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div id="camera-modal" class="modal" aria-hidden="true">
     <div class="modal__backdrop" data-close-camera-modal></div>
     <div class="modal__dialog modal__dialog--sm" role="dialog" aria-modal="true" aria-labelledby="camera-modal-title">
@@ -383,8 +529,9 @@
     </div>
   </div>
 
-  <script src="/js/admin.js?v=4"></script>
+  <script src="/js/admin.js?v=5"></script>
   <script src="/js/cadastro.js?v=3"></script>
   <script src="/js/ocorrencias.js?v=3"></script>
+  <script src="/js/usuarios.js?v=1"></script>
 </body>
 </html>
