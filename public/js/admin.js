@@ -23,7 +23,7 @@ async function loadUser() {
 
     const navUsuarios = document.getElementById('nav-usuarios');
     if (navUsuarios) {
-      navUsuarios.hidden = user.role !== 'admin';
+      navUsuarios.hidden = !isAdmin();
     }
   } catch {
     window.location.href = '/?login=required';
@@ -39,8 +39,16 @@ function initNavigation() {
   });
 }
 
+function isAdmin() {
+  return currentUser && currentUser.role === 'admin';
+}
+
 function navigateToPage(page) {
   if (!PAGE_CONFIG[page]) return;
+
+  if (page === 'usuarios' && !isAdmin()) {
+    return;
+  }
 
   const targetSection = document.getElementById(`page-${page}`);
   if (!targetSection) {
@@ -138,6 +146,7 @@ window.Admin = {
   nowDatetimeLocalValue,
   navigateToPage,
   getCurrentUser: () => currentUser,
+  isAdmin,
 };
 
 const Reports = (function createReportsModule() {
