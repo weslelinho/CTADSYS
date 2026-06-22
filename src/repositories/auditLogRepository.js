@@ -36,7 +36,17 @@ const auditLogRepository = {
     return row ? new AuditLog(row) : null;
   },
 
-  findAll({ entityType, entityId, userId, action, limit = 50, offset = 0 } = {}) {
+  findAll({
+    entityType,
+    entityId,
+    userId,
+    clientId,
+    action,
+    dateFrom,
+    dateTo,
+    limit = 50,
+    offset = 0,
+  } = {}) {
     const conditions = [];
     const params = [];
 
@@ -52,9 +62,29 @@ const auditLogRepository = {
       conditions.push('a.user_id = ?');
       params.push(userId);
     }
+    if (clientId) {
+      conditions.push(`(
+        (a.entity_type = 'client' AND a.entity_id = ?)
+        OR (
+          a.entity_type = 'occurrence' AND (
+            CAST(json_extract(a.new_values, '$.clientId') AS INTEGER) = ?
+            OR CAST(json_extract(a.old_values, '$.clientId') AS INTEGER) = ?
+          )
+        )
+      )`);
+      params.push(clientId, clientId, clientId);
+    }
     if (action) {
       conditions.push('a.action = ?');
       params.push(action);
+    }
+    if (dateFrom) {
+      conditions.push('a.created_at >= ?');
+      params.push(`${dateFrom} 00:00:00`);
+    }
+    if (dateTo) {
+      conditions.push('a.created_at <= ?');
+      params.push(`${dateTo} 23:59:59`);
     }
 
     const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';

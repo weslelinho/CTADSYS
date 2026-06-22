@@ -18,6 +18,13 @@ const userRepository = {
     return row ? new User(row) : null;
   },
 
+  findAll() {
+    const rows = db
+      .prepare('SELECT id, username, name, email, role, created_at FROM users ORDER BY name ASC')
+      .all();
+    return rows.map((row) => new User(row));
+  },
+
   create({ username, passwordHash, name, email, role }) {
     const result = db
       .prepare(

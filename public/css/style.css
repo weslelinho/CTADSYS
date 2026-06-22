@@ -705,6 +705,55 @@ img {
   color: var(--color-text-muted);
 }
 
+.report-filters {
+  margin-bottom: 1.25rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.report-filters__row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.report-filters__row--actions {
+  display: flex;
+  align-items: flex-end;
+  gap: 1rem;
+  margin-bottom: 0;
+}
+
+.report-filters__field {
+  margin-bottom: 0;
+}
+
+.report-filters__field label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  margin-bottom: 0.35rem;
+}
+
+.report-filters__search {
+  flex: 1;
+  min-width: 200px;
+  margin-bottom: 0;
+}
+
+.report-filters .form-control {
+  width: 100%;
+  padding: 0.55rem 0.85rem;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: var(--font);
+  font-size: 0.9rem;
+}
+
 /* ── Modal ── */
 .modal {
   position: fixed;

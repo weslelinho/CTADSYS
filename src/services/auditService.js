@@ -55,7 +55,10 @@ const auditService = {
       entityType: filters.entityType || null,
       entityId: filters.entityId ? Number(filters.entityId) : null,
       userId: filters.userId ? Number(filters.userId) : null,
+      clientId: filters.clientId ? Number(filters.clientId) : null,
       action: filters.action || null,
+      dateFrom: filters.dateFrom || null,
+      dateTo: filters.dateTo || null,
       limit,
       offset,
     });
