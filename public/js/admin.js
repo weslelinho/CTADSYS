@@ -180,7 +180,7 @@ const Reports = (function createReportsModule() {
   let userSelect;
   let dateFromInput;
   let dateToInput;
-  let actionSelect;
+  let actionCheckboxes;
   let reportSearchInput;
   let clearBtn;
 
@@ -190,9 +190,34 @@ const Reports = (function createReportsModule() {
     userSelect = document.getElementById('report-user-select');
     dateFromInput = document.getElementById('report-date-from');
     dateToInput = document.getElementById('report-date-to');
-    actionSelect = document.getElementById('report-action-select');
+    actionCheckboxes = document.getElementById('report-action-checkboxes');
     reportSearchInput = document.getElementById('report-search-input');
     clearBtn = document.getElementById('report-clear-btn');
+  }
+
+  function getSelectedActions() {
+    if (!actionCheckboxes) return [];
+    return Array.from(actionCheckboxes.querySelectorAll('input[type="checkbox"]:checked')).map(
+      (input) => input.value
+    );
+  }
+
+  function renderActionCheckboxes() {
+    if (!actionCheckboxes || actionCheckboxes.dataset.rendered === 'true') return;
+
+    actionCheckboxes.innerHTML = Object.entries(ACTION_LABELS)
+      .map(([value, label]) => {
+        const id = `report-action-${value.replace(/\./g, '-')}`;
+        return `
+          <label class="report-action-checkboxes__item" for="${id}">
+            <input type="checkbox" id="${id}" name="report-action" value="${escapeHtml(value)}">
+            <span>${escapeHtml(label)}</span>
+          </label>
+        `;
+      })
+      .join('');
+
+    actionCheckboxes.dataset.rendered = 'true';
   }
 
   function showMessage(icon, message) {
@@ -269,7 +294,7 @@ const Reports = (function createReportsModule() {
       (userSelect && userSelect.value) ||
       (dateFromInput && dateFromInput.value) ||
       (dateToInput && dateToInput.value) ||
-      (actionSelect && actionSelect.value) ||
+      getSelectedActions().length > 0 ||
       searchFilter
     );
   }
@@ -446,7 +471,7 @@ const Reports = (function createReportsModule() {
     if (userSelect && userSelect.value) params.set('userId', userSelect.value);
     if (dateFromInput && dateFromInput.value) params.set('dateFrom', dateFromInput.value);
     if (dateToInput && dateToInput.value) params.set('dateTo', dateToInput.value);
-    if (actionSelect && actionSelect.value) params.set('action', actionSelect.value);
+    getSelectedActions().forEach((action) => params.append('action', action));
 
     try {
       const res = await fetch(`/api/audit-logs?${params}`);
@@ -473,7 +498,11 @@ const Reports = (function createReportsModule() {
     if (userSelect) userSelect.value = '';
     if (dateFromInput) dateFromInput.value = '';
     if (dateToInput) dateToInput.value = '';
-    if (actionSelect) actionSelect.value = '';
+    if (actionCheckboxes) {
+      actionCheckboxes.querySelectorAll('input[type="checkbox"]').forEach((input) => {
+        input.checked = false;
+      });
+    }
     if (reportSearchInput) reportSearchInput.value = '';
     searchFilter = '';
     reportPage = 1;
@@ -495,6 +524,7 @@ const Reports = (function createReportsModule() {
   function initReportsPage() {
     if (reportInitialized) return;
     bindElements();
+    renderActionCheckboxes();
     if (!reportTbody || !reportSearchInput || !clearBtn) return;
 
     reportSearchInput.addEventListener('input', () => {
@@ -502,7 +532,7 @@ const Reports = (function createReportsModule() {
       renderLogs();
     });
 
-    [clientSelect, userSelect, dateFromInput, dateToInput, actionSelect]
+    [clientSelect, userSelect, dateFromInput, dateToInput]
       .filter(Boolean)
       .forEach((el) => {
         el.addEventListener('change', () => {
@@ -510,6 +540,13 @@ const Reports = (function createReportsModule() {
           loadLogs();
         });
       });
+
+    if (actionCheckboxes) {
+      actionCheckboxes.addEventListener('change', () => {
+        reportPage = 1;
+        loadLogs();
+      });
+    }
 
     clearBtn.addEventListener('click', clearFilters);
     document.addEventListener('click', handlePaginationClick);

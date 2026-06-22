@@ -75,8 +75,15 @@ const auditLogRepository = {
       params.push(clientId, clientId, clientId);
     }
     if (action) {
-      conditions.push('a.action = ?');
-      params.push(action);
+      const actions = Array.isArray(action) ? action : [action];
+      const validActions = actions.filter(Boolean);
+      if (validActions.length === 1) {
+        conditions.push('a.action = ?');
+        params.push(validActions[0]);
+      } else if (validActions.length > 1) {
+        conditions.push(`a.action IN (${validActions.map(() => '?').join(', ')})`);
+        params.push(...validActions);
+      }
     }
     if (dateFrom) {
       conditions.push('a.created_at >= ?');

@@ -148,25 +148,11 @@
                 <label for="report-date-to">Período — até</label>
                 <input type="date" id="report-date-to" class="form-control">
               </div>
-              <div class="form-group report-filters__field">
-                <label for="report-action-select">Tipo de ação</label>
-                <select id="report-action-select" class="form-control">
-                  <option value="">Todas as ações</option>
-                  <option value="client.create">Paciente criado</option>
-                  <option value="client.update">Paciente atualizado</option>
-                  <option value="client.delete">Paciente excluído</option>
-                  <option value="client.photo.upload">Foto enviada</option>
-                  <option value="client.photo.remove">Foto removida</option>
-                  <option value="occurrence.create">Ocorrência criada</option>
-                  <option value="occurrence.update">Ocorrência atualizada</option>
-                  <option value="occurrence.delete">Ocorrência excluída</option>
-                  <option value="auth.login">Login</option>
-                  <option value="auth.login.failed">Login falhou</option>
-                  <option value="auth.logout">Logout</option>
-                  <option value="user.create">Usuário criado</option>
-                  <option value="user.password.update">Senha alterada</option>
-                  <option value="user.delete">Usuário excluído</option>
-                </select>
+            </div>
+            <div class="report-filters__row">
+              <div class="form-group report-filters__field report-filters__field--actions">
+                <span class="report-filters__field-label" id="report-action-checkboxes-label">Tipo de ações</span>
+                <div id="report-action-checkboxes" class="report-action-checkboxes" role="group" aria-labelledby="report-action-checkboxes-label"></div>
               </div>
             </div>
             <div class="report-filters__row report-filters__row--actions">
