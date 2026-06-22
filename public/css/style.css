@@ -584,6 +584,10 @@ img {
   padding: 0 0.75rem;
 }
 
+.sidebar__link[hidden] {
+  display: none !important;
+}
+
 .sidebar__link {
   display: flex;
   align-items: center;

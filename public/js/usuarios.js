@@ -117,8 +117,7 @@ function renderUsers() {
 }
 
 async function onPageShow() {
-  const currentUser = Admin.getCurrentUser();
-  if (!currentUser || currentUser.role !== 'admin') {
+  if (!Admin.isAdmin()) {
     Admin.navigateToPage('pacientes');
     return;
   }
