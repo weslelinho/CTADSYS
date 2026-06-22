@@ -2,9 +2,11 @@ const PAGE_CONFIG = {
   pacientes: { title: 'Pacientes' },
   ocorrencias: { title: 'Ocorrências' },
   relatorios: { title: 'Relatórios' },
+  usuarios: { title: 'Usuários' },
 };
 
 let currentPage = 'pacientes';
+let currentUser = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
   await loadUser();
@@ -17,7 +19,13 @@ async function loadUser() {
     const res = await fetch('/auth/me');
     if (!res.ok) throw new Error('Unauthorized');
     const { user } = await res.json();
+    currentUser = user;
     document.getElementById('user-name').textContent = `${user.name} (${user.username})`;
+
+    const navUsuarios = document.getElementById('nav-usuarios');
+    if (navUsuarios) {
+      navUsuarios.hidden = user.role !== 'admin';
+    }
   } catch {
     window.location.href = '/?login=required';
   }
@@ -59,6 +67,10 @@ function navigateToPage(page) {
 
   if (page === 'relatorios') {
     Reports.onPageShow();
+  }
+
+  if (page === 'usuarios' && window.Users && window.Users.onPageShow) {
+    window.Users.onPageShow();
   }
 }
 
@@ -109,7 +121,9 @@ function closeTopModal() {
   if (openModals.length === 0) return;
 
   const topModal = openModals[openModals.length - 1];
-  const closeBtn = topModal.querySelector('[data-close-patient-modal], [data-close-delete-modal], [data-close-occurrence-modal]');
+  const closeBtn = topModal.querySelector(
+    '[data-close-patient-modal], [data-close-delete-modal], [data-close-occurrence-modal], [data-close-user-modal], [data-close-user-password-modal], [data-close-delete-user-modal]'
+  );
   if (closeBtn) closeBtn.click();
 }
 
@@ -124,6 +138,7 @@ window.Admin = {
   toDatetimeLocalValue,
   nowDatetimeLocalValue,
   navigateToPage,
+  getCurrentUser: () => currentUser,
 };
 
 const Reports = (function createReportsModule() {
@@ -141,12 +156,16 @@ const Reports = (function createReportsModule() {
     'auth.login': 'Login realizado',
     'auth.login.failed': 'Tentativa de login falhou',
     'auth.logout': 'Logout realizado',
+    'user.create': 'Usuário criado',
+    'user.password.update': 'Senha de usuário alterada',
+    'user.delete': 'Usuário excluído',
   };
 
   const ENTITY_LABELS = {
     client: 'Paciente',
     occurrence: 'Ocorrência',
     auth: 'Autenticação',
+    user: 'Usuário',
   };
 
   let reportLogs = [];

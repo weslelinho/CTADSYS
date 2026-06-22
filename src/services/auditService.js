@@ -12,6 +12,9 @@ const ACTIONS = {
   AUTH_LOGIN: 'auth.login',
   AUTH_LOGIN_FAILED: 'auth.login.failed',
   AUTH_LOGOUT: 'auth.logout',
+  USER_CREATE: 'user.create',
+  USER_PASSWORD_UPDATE: 'user.password.update',
+  USER_DELETE: 'user.delete',
 };
 
 function serialize(value) {

@@ -35,6 +35,26 @@ const userRepository = {
 
     return this.findById(result.lastInsertRowid);
   },
+
+  updatePassword(id, passwordHash) {
+    db.prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(passwordHash, id);
+    return this.findById(id);
+  },
+
+  countByRole(role) {
+    return db.prepare('SELECT COUNT(*) AS total FROM users WHERE role = ?').get(role).total;
+  },
+
+  delete(id) {
+    const deleteUser = db.transaction((userId) => {
+      db.prepare('UPDATE audit_logs SET user_id = NULL WHERE user_id = ?').run(userId);
+      db.prepare('UPDATE clients SET created_by = NULL WHERE created_by = ?').run(userId);
+      db.prepare('UPDATE occurrences SET created_by = NULL WHERE created_by = ?').run(userId);
+      db.prepare('DELETE FROM users WHERE id = ?').run(userId);
+    });
+
+    deleteUser(id);
+  },
 };
 
 module.exports = userRepository;
