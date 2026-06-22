@@ -23,6 +23,19 @@ function serialize(value) {
   return JSON.stringify(value);
 }
 
+function normalizeActions(action) {
+  if (!action) return null;
+  if (Array.isArray(action)) {
+    const values = action.filter(Boolean);
+    return values.length ? values : null;
+  }
+  if (typeof action === 'string' && action.includes(',')) {
+    const values = action.split(',').map((value) => value.trim()).filter(Boolean);
+    return values.length ? values : null;
+  }
+  return [action];
+}
+
 function getRequestMeta(req) {
   if (!req) return {};
   const forwarded = req.headers?.['x-forwarded-for'];
@@ -59,7 +72,7 @@ const auditService = {
       entityId: filters.entityId ? Number(filters.entityId) : null,
       userId: filters.userId ? Number(filters.userId) : null,
       clientId: filters.clientId ? Number(filters.clientId) : null,
-      action: filters.action || null,
+      action: normalizeActions(filters.action),
       dateFrom: filters.dateFrom || null,
       dateTo: filters.dateTo || null,
       limit,
