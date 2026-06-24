@@ -302,6 +302,103 @@
 
           <div class="form-row">
             <div class="form-group">
+              <label for="rg">RG</label>
+              <input type="text" id="rg" name="rg" placeholder="Número do RG">
+            </div>
+            <div class="form-group">
+              <label for="orgaoExpedidor">Órgão Expedidor</label>
+              <input type="text" id="orgaoExpedidor" name="orgaoExpedidor" placeholder="Ex.: SSP/SP">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="dataEmissao">Data de Emissão (RG)</label>
+              <input type="date" id="dataEmissao" name="dataEmissao">
+            </div>
+            <div class="form-group">
+              <label for="tituloEleitor">Título de Eleitor</label>
+              <input type="text" id="tituloEleitor" name="tituloEleitor" placeholder="Número do título">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="sexo">Sexo</label>
+              <select id="sexo" name="sexo">
+                <option value="">Selecione...</option>
+                <option value="masculino">Masculino</option>
+                <option value="feminino">Feminino</option>
+                <option value="outro">Outro</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="naturalidade">Naturalidade</label>
+              <input type="text" id="naturalidade" name="naturalidade" placeholder="Cidade/UF de nascimento">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="filiacaoPai">Filiação (Pai)</label>
+              <input type="text" id="filiacaoPai" name="filiacaoPai" placeholder="Nome do pai">
+            </div>
+            <div class="form-group">
+              <label for="filiacaoMae">Filiação (Mãe)</label>
+              <input type="text" id="filiacaoMae" name="filiacaoMae" placeholder="Nome da mãe">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="profissao">Profissão</label>
+              <input type="text" id="profissao" name="profissao" placeholder="Profissão atual">
+            </div>
+            <div class="form-group">
+              <label for="escolaridade">Escolaridade</label>
+              <select id="escolaridade" name="escolaridade">
+                <option value="">Selecione...</option>
+                <option value="fundamental_incompleto">Fundamental incompleto</option>
+                <option value="fundamental_completo">Fundamental completo</option>
+                <option value="medio_incompleto">Médio incompleto</option>
+                <option value="medio_completo">Médio completo</option>
+                <option value="superior_incompleto">Superior incompleto</option>
+                <option value="superior_completo">Superior completo</option>
+                <option value="pos_graduacao">Pós-graduação</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="estadoCivil">Estado Civil</label>
+              <select id="estadoCivil" name="estadoCivil">
+                <option value="">Selecione...</option>
+                <option value="solteiro">Solteiro(a)</option>
+                <option value="casado">Casado(a)</option>
+                <option value="divorciado">Divorciado(a)</option>
+                <option value="viuvo">Viúvo(a)</option>
+                <option value="uniao_estavel">União estável</option>
+                <option value="separado">Separado(a)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="trabalha">Trabalha</label>
+              <select id="trabalha" name="trabalha">
+                <option value="">Selecione...</option>
+                <option value="true">Sim</option>
+                <option value="false">Não</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="numeroFilhos">Número de Filhos</label>
+            <input type="number" id="numeroFilhos" name="numeroFilhos" min="0" step="1" placeholder="0">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
               <label for="phone">Telefone</label>
               <input type="tel" id="phone" name="phone" placeholder="(00) 00000-0000">
             </div>
@@ -333,14 +430,19 @@
               <input type="date" id="admissionDate" name="admissionDate">
             </div>
             <div class="form-group">
-              <label for="status">Status</label>
-              <select id="status" name="status">
+              <label for="exitDate">Data de Saída</label>
+              <input type="date" id="exitDate" name="exitDate">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="status">Status</label>
+            <select id="status" name="status">
                 <option value="ativo">Ativo</option>
                 <option value="alta">Alta</option>
                 <option value="transferido">Transferido</option>
                 <option value="desligado">Desligado</option>
               </select>
-            </div>
           </div>
 
           <div class="form-group">
