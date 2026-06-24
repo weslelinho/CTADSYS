@@ -3,6 +3,7 @@ const PAGE_CONFIG = {
   ocorrencias: { title: 'Ocorrências' },
   relatorios: { title: 'Relatórios' },
   usuarios: { title: 'Usuários' },
+  'pagina-ctad': { title: 'Página CTAD' },
 };
 
 let currentPage = 'pacientes';
@@ -25,6 +26,11 @@ async function loadUser() {
     if (navUsuarios) {
       navUsuarios.hidden = !isAdmin();
     }
+
+    const navPaginaCtad = document.getElementById('nav-pagina-ctad');
+    if (navPaginaCtad) {
+      navPaginaCtad.hidden = !isAdmin();
+    }
   } catch {
     window.location.href = '/?login=required';
   }
@@ -46,7 +52,7 @@ function isAdmin() {
 function navigateToPage(page) {
   if (!PAGE_CONFIG[page]) return;
 
-  if (page === 'usuarios' && !isAdmin()) {
+  if ((page === 'usuarios' || page === 'pagina-ctad') && !isAdmin()) {
     return;
   }
 
@@ -78,6 +84,10 @@ function navigateToPage(page) {
 
   if (page === 'usuarios' && window.Users && window.Users.onPageShow) {
     window.Users.onPageShow();
+  }
+
+  if (page === 'pagina-ctad' && window.PageContentAdmin && window.PageContentAdmin.onPageShow) {
+    window.PageContentAdmin.onPageShow();
   }
 }
 
@@ -167,6 +177,7 @@ const Reports = (function createReportsModule() {
     'user.create': 'Usuário criado',
     'user.password.update': 'Senha de usuário alterada',
     'user.delete': 'Usuário excluído',
+    'page_content.update': 'Conteúdo da página pública atualizado',
   };
 
   const ENTITY_LABELS = {
@@ -174,6 +185,7 @@ const Reports = (function createReportsModule() {
     occurrence: 'Ocorrência',
     auth: 'Autenticação',
     user: 'Usuário',
+    page_content: 'Página CTAD',
   };
 
   let reportLogs = [];
