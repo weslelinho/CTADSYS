@@ -74,6 +74,8 @@ function initializeDatabase() {
   migrateUsersTable();
   migrateClientsHiddenColumn();
   migrateClientsPhotoColumn();
+  migrateClientsExtendedFields();
+  migrateClientsExitDateColumn();
   initializeOccurrencesTable(db);
   initializeAuditLogsTable(db);
   initializePageContentTable(db);
@@ -90,6 +92,38 @@ function migrateClientsPhotoColumn() {
   const columns = db.prepare('PRAGMA table_info(clients)').all().map((c) => c.name);
   if (!columns.includes('photo_path')) {
     db.exec('ALTER TABLE clients ADD COLUMN photo_path TEXT');
+  }
+}
+
+function migrateClientsExtendedFields() {
+  const columns = db.prepare('PRAGMA table_info(clients)').all().map((c) => c.name);
+  const additions = [
+    ['rg', 'TEXT'],
+    ['orgao_expedidor', 'TEXT'],
+    ['data_emissao', 'TEXT'],
+    ['titulo_eleitor', 'TEXT'],
+    ['profissao', 'TEXT'],
+    ['escolaridade', 'TEXT'],
+    ['estado_civil', 'TEXT'],
+    ['filiacao_pai', 'TEXT'],
+    ['filiacao_mae', 'TEXT'],
+    ['naturalidade', 'TEXT'],
+    ['sexo', 'TEXT'],
+    ['trabalha', 'INTEGER'],
+    ['numero_filhos', 'INTEGER'],
+  ];
+
+  for (const [name, type] of additions) {
+    if (!columns.includes(name)) {
+      db.exec(`ALTER TABLE clients ADD COLUMN ${name} ${type}`);
+    }
+  }
+}
+
+function migrateClientsExitDateColumn() {
+  const columns = db.prepare('PRAGMA table_info(clients)').all().map((c) => c.name);
+  if (!columns.includes('data_saida')) {
+    db.exec('ALTER TABLE clients ADD COLUMN data_saida TEXT');
   }
 }
 

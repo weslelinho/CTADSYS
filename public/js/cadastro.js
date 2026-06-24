@@ -238,12 +238,28 @@ function fillPatientForm(client) {
   document.getElementById('fullName').value = client.fullName || '';
   document.getElementById('cpf').value = client.cpf || '';
   document.getElementById('birthDate').value = client.birthDate || '';
+  document.getElementById('rg').value = client.rg || '';
+  document.getElementById('orgaoExpedidor').value = client.orgaoExpedidor || '';
+  document.getElementById('dataEmissao').value = client.dataEmissao || '';
+  document.getElementById('tituloEleitor').value = client.tituloEleitor || '';
+  document.getElementById('sexo').value = client.sexo || '';
+  document.getElementById('naturalidade').value = client.naturalidade || '';
+  document.getElementById('filiacaoPai').value = client.filiacaoPai || '';
+  document.getElementById('filiacaoMae').value = client.filiacaoMae || '';
+  document.getElementById('profissao').value = client.profissao || '';
+  document.getElementById('escolaridade').value = client.escolaridade || '';
+  document.getElementById('estadoCivil').value = client.estadoCivil || '';
+  document.getElementById('trabalha').value =
+    client.trabalha === true ? 'true' : client.trabalha === false ? 'false' : '';
+  document.getElementById('numeroFilhos').value =
+    client.numeroFilhos !== null && client.numeroFilhos !== undefined ? client.numeroFilhos : '';
   document.getElementById('phone').value = client.phone || '';
   document.getElementById('email').value = client.email || '';
   document.getElementById('address').value = client.address || '';
   document.getElementById('city').value = client.city || '';
   document.getElementById('state').value = client.state || '';
   document.getElementById('admissionDate').value = client.admissionDate || '';
+  document.getElementById('exitDate').value = client.exitDate || '';
   document.getElementById('status').value = client.status || 'ativo';
   document.getElementById('notes').value = client.notes || '';
   setPhotoPreview(client.photoPath);
@@ -551,16 +567,33 @@ async function confirmDeletePatient() {
 }
 
 function getFormData() {
+  const trabalhaValue = document.getElementById('trabalha').value;
+  const numeroFilhosValue = document.getElementById('numeroFilhos').value;
+
   return {
     fullName: document.getElementById('fullName').value.trim(),
     cpf: document.getElementById('cpf').value.trim() || null,
     birthDate: document.getElementById('birthDate').value || null,
+    rg: document.getElementById('rg').value.trim() || null,
+    orgaoExpedidor: document.getElementById('orgaoExpedidor').value.trim() || null,
+    dataEmissao: document.getElementById('dataEmissao').value || null,
+    tituloEleitor: document.getElementById('tituloEleitor').value.trim() || null,
+    sexo: document.getElementById('sexo').value || null,
+    naturalidade: document.getElementById('naturalidade').value.trim() || null,
+    filiacaoPai: document.getElementById('filiacaoPai').value.trim() || null,
+    filiacaoMae: document.getElementById('filiacaoMae').value.trim() || null,
+    profissao: document.getElementById('profissao').value.trim() || null,
+    escolaridade: document.getElementById('escolaridade').value || null,
+    estadoCivil: document.getElementById('estadoCivil').value || null,
+    trabalha: trabalhaValue === '' ? null : trabalhaValue === 'true',
+    numeroFilhos: numeroFilhosValue === '' ? null : Number(numeroFilhosValue),
     phone: document.getElementById('phone').value.trim() || null,
     email: document.getElementById('email').value.trim() || null,
     address: document.getElementById('address').value.trim() || null,
     city: document.getElementById('city').value.trim() || null,
     state: document.getElementById('state').value.trim().toUpperCase() || null,
     admissionDate: document.getElementById('admissionDate').value || null,
+    exitDate: document.getElementById('exitDate').value || null,
     status: document.getElementById('status').value,
     notes: document.getElementById('notes').value.trim() || null,
   };
