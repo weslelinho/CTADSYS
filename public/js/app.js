@@ -17,6 +17,24 @@ function showLoginCard({ scroll = true } = {}) {
   }
 }
 
+function hideLoginCard() {
+  const loginCard = document.getElementById('login-card');
+  if (!loginCard || loginCard.hidden) return;
+
+  loginCard.hidden = true;
+}
+
+function toggleLoginCard() {
+  const loginCard = document.getElementById('login-card');
+  if (!loginCard) return;
+
+  if (loginCard.hidden) {
+    showLoginCard();
+  } else {
+    hideLoginCard();
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const params = new URLSearchParams(window.location.search);
   const alertBox = document.getElementById('alert-box');
@@ -29,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.js-show-login').forEach((link) => {
     link.addEventListener('click', (e) => {
       e.preventDefault();
-      showLoginCard();
+      toggleLoginCard();
     });
   });
 
