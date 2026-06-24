@@ -3,6 +3,20 @@ const MESSAGES = {
   auth_failed: 'Usuário ou senha inválidos. Tente novamente.',
 };
 
+function showLoginCard({ scroll = true } = {}) {
+  const loginCard = document.getElementById('login-card');
+  if (!loginCard || !loginCard.hidden) return;
+
+  loginCard.hidden = false;
+
+  if (scroll) {
+    requestAnimationFrame(() => {
+      loginCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      document.getElementById('username')?.focus();
+    });
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const params = new URLSearchParams(window.location.search);
   const alertBox = document.getElementById('alert-box');
@@ -12,14 +26,21 @@ document.addEventListener('DOMContentLoaded', () => {
   const error = params.get('error');
   const login = params.get('login');
 
+  document.querySelectorAll('.js-show-login').forEach((link) => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      showLoginCard();
+    });
+  });
+
   if (error && MESSAGES[error]) {
     showAlert(alertBox, MESSAGES[error], 'error');
   } else if (login === 'required') {
     showAlert(alertBox, MESSAGES.login_required, 'info');
   }
 
-  if (error || login) {
-    document.getElementById('login-card')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  if (error || login || window.location.hash === '#login-card') {
+    showLoginCard();
     window.history.replaceState({}, '', '/');
   }
 
