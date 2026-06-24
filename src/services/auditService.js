@@ -15,6 +15,7 @@ const ACTIONS = {
   USER_CREATE: 'user.create',
   USER_PASSWORD_UPDATE: 'user.password.update',
   USER_DELETE: 'user.delete',
+  PAGE_CONTENT_UPDATE: 'page_content.update',
 };
 
 function serialize(value) {

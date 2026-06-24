@@ -3,6 +3,61 @@ const MESSAGES = {
   auth_failed: 'Usuário ou senha inválidos. Tente novamente.',
 };
 
+function phoneToTelHref(phone) {
+  const digits = String(phone || '').replace(/\D/g, '');
+  if (!digits) return 'tel:';
+  return digits.startsWith('55') ? `tel:+${digits}` : `tel:+55${digits}`;
+}
+
+function applyPageContent(content) {
+  if (!content || typeof content !== 'object') return;
+
+  document.querySelectorAll('[data-content]').forEach((el) => {
+    const key = el.dataset.content;
+    if (content[key] == null) return;
+    el.textContent = content[key];
+  });
+
+  document.querySelectorAll('[data-content-meta]').forEach((el) => {
+    const key = el.dataset.contentMeta;
+    if (content[key] != null) {
+      el.setAttribute('content', content[key]);
+    }
+  });
+
+  document.querySelectorAll('[data-content-title]').forEach((el) => {
+    const key = el.dataset.contentTitle;
+    if (content[key] != null) {
+      el.textContent = content[key];
+    }
+  });
+
+  document.querySelectorAll('[data-content-href-mail]').forEach((el) => {
+    const key = el.dataset.contentHrefMail;
+    if (content[key] != null) {
+      el.href = `mailto:${content[key]}`;
+    }
+  });
+
+  document.querySelectorAll('[data-content-href-tel]').forEach((el) => {
+    const key = el.dataset.contentHrefTel;
+    if (content[key] != null) {
+      el.href = phoneToTelHref(content[key]);
+    }
+  });
+}
+
+async function loadPageContent() {
+  try {
+    const res = await fetch('/api/page-content');
+    if (!res.ok) return;
+    const data = await res.json();
+    applyPageContent(data.content);
+  } catch {
+    // Keep static fallback content
+  }
+}
+
 function showLoginCard({ scroll = true } = {}) {
   const loginCard = document.getElementById('login-card');
   if (!loginCard || !loginCard.hidden) return;
@@ -36,6 +91,8 @@ function toggleLoginCard() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  loadPageContent();
+
   const params = new URLSearchParams(window.location.search);
   const alertBox = document.getElementById('alert-box');
   const loginForm = document.getElementById('login-form');

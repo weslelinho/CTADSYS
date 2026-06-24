@@ -227,7 +227,7 @@ img {
   margin-bottom: 1.25rem;
 }
 
-.hero__title span {
+.hero__title-accent {
   color: var(--color-primary-light);
 }
 
@@ -1372,4 +1372,40 @@ body.modal-open {
   .form-row {
     grid-template-columns: 1fr;
   }
+}
+
+.page-content-intro {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.92rem;
+  flex: 1;
+}
+
+.page-content-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.page-content-section {
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  margin: 0;
+}
+
+.page-content-section legend {
+  font-weight: 700;
+  color: var(--color-primary-dark);
+  padding: 0 0.5rem;
+}
+
+#page-pagina-ctad .card__toolbar {
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+#page-pagina-ctad .form-group textarea {
+  min-height: 5rem;
+  resize: vertical;
 }

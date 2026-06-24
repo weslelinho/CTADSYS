@@ -31,6 +31,10 @@
           <span class="sidebar__icon">🔐</span>
           Usuários
         </a>
+        <a href="#" class="sidebar__link" data-page="pagina-ctad" id="nav-pagina-ctad" hidden>
+          <span class="sidebar__icon">🌐</span>
+          Página CTAD
+        </a>
       </nav>
 
       <div class="sidebar__footer">
@@ -226,6 +230,25 @@
                 </tr>
               </tbody>
             </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="admin-content admin-page" id="page-pagina-ctad" hidden>
+        <div class="card">
+          <div class="card__toolbar">
+            <p class="page-content-intro">
+              Edite os textos exibidos na página pública do site. As alterações são aplicadas imediatamente após salvar.
+            </p>
+            <button type="button" class="btn btn--primary" id="page-content-save-btn">Salvar alterações</button>
+          </div>
+
+          <div id="page-content-alert" class="alert" role="alert" hidden></div>
+          <div id="page-content-form" class="page-content-form">
+            <div class="empty-state">
+              <div class="empty-state__icon">🌐</div>
+              <p>Carregando conteúdos...</p>
+            </div>
           </div>
         </div>
       </section>
@@ -518,9 +541,10 @@
     </div>
   </div>
 
-  <script src="/js/admin.js?v=6"></script>
+  <script src="/js/admin.js?v=7"></script>
   <script src="/js/cadastro.js?v=3"></script>
   <script src="/js/ocorrencias.js?v=3"></script>
   <script src="/js/usuarios.js?v=1"></script>
+  <script src="/js/pagina-ctad.js?v=1"></script>
 </body>
 </html>
