@@ -151,6 +151,7 @@ function renderClients() {
       <td>
         <div class="table-actions">
           <button type="button" class="btn btn--outline btn--sm" data-action="edit" data-id="${c.id}">Editar</button>
+          <button type="button" class="btn btn--outline btn--sm" data-action="print" data-id="${c.id}">Imprimir</button>
           <button type="button" class="btn btn--danger btn--sm" data-action="delete" data-id="${c.id}">Excluir</button>
         </div>
       </td>
@@ -432,6 +433,7 @@ function handleTableClick(e) {
 
   const id = Number(btn.dataset.id);
   if (btn.dataset.action === 'edit') editClient(id);
+  if (btn.dataset.action === 'print') printClient(id);
   if (btn.dataset.action === 'delete') openDeleteModal(id);
 }
 
@@ -461,6 +463,17 @@ function openNewPatientModal() {
   resetForm();
   formTitle.textContent = 'Novo Paciente';
   openModal();
+}
+
+async function printClient(id) {
+  try {
+    const res = await fetch(`/api/clients/${id}`);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Paciente não encontrado');
+    await window.PatientPrint.open(data.client);
+  } catch (err) {
+    alert(err.message);
+  }
 }
 
 async function editClient(id) {
