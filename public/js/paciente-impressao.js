@@ -24,6 +24,18 @@ const PatientPrint = (function createPatientPrintModule() {
     outro: 'Outro',
   };
 
+  const QUESTIONNAIRE_ITEMS = [
+    { type: 'yn', text: 'Nosso tratamento é evangélico. Está disposto?' },
+    { type: 'yn', text: 'Você está disposto a se recuperar?' },
+    { type: 'line', text: 'Doenças que tem ou já teve?' },
+    { type: 'line', text: 'Já passou em alguma clínica? Qual?' },
+    { type: 'line', text: 'Quais drogas fez uso?' },
+    { type: 'line', text: 'Responde algum processo? Qual?' },
+    { type: 'line', text: 'Com que idade começou a usar drogas?' },
+    { type: 'line', text: 'Pretende ficar o tempo determinado?' },
+    { type: 'yn', text: 'Está disposto a obedecer o regulamento da casa?' },
+  ];
+
   function escapeHtml(str) {
     const div = document.createElement('div');
     div.textContent = str == null ? '' : String(str);
@@ -55,34 +67,24 @@ const PatientPrint = (function createPatientPrintModule() {
     return '—';
   }
 
-  function tableRow(labelText, value) {
+  function compactField(labelText, value, wide) {
     return `
-      <tr>
-        <th>${escapeHtml(labelText)}</th>
-        <td>${escapeHtml(value ?? '—')}</td>
-      </tr>`;
+      <span class="compact-field${wide ? ' compact-field--wide' : ''}">
+        <span class="compact-field__label">${escapeHtml(labelText)}</span>
+        <span class="compact-field__value">${escapeHtml(value ?? '—')}</span>
+      </span>`;
   }
 
-  function tableRowWide(labelText, value) {
+  function compactGroup(title, fieldsHtml) {
     return `
-      <tr class="data-table__row--wide">
-        <th>${escapeHtml(labelText)}</th>
-        <td>${escapeHtml(value ?? '—')}</td>
-      </tr>`;
-  }
-
-  function tableRowPair(label1, value1, label2, value2) {
-    return `
-      <tr class="data-table__row--pair">
-        <th>${escapeHtml(label1)}</th>
-        <td>${escapeHtml(value1 ?? '—')}</td>
-        <th>${escapeHtml(label2)}</th>
-        <td>${escapeHtml(value2 ?? '—')}</td>
-      </tr>`;
+      <div class="compact-fields__group">
+        <p class="compact-fields__title">${escapeHtml(title)}</p>
+        <div class="compact-fields__row">${fieldsHtml}</div>
+      </div>`;
   }
 
   function yesNoOptions() {
-    return '<span class="yn-option">(&nbsp;) Sim</span><span class="yn-option">(&nbsp;) Não</span>';
+    return '<span class="yn-option">() Sim</span><span class="yn-option">() Não</span>';
   }
 
   function questionYesNo(text) {
@@ -114,84 +116,70 @@ const PatientPrint = (function createPatientPrintModule() {
     return '<div class="patient-photo patient-photo--empty">Foto<br>3×4</div>';
   }
 
-  function buildPatientTablesHtml(client) {
+  function buildPatientDataHtml(client) {
     const filhos =
       client.numeroFilhos !== null && client.numeroFilhos !== undefined ? client.numeroFilhos : '—';
 
     return `
-      <div class="data-sections">
-        <table class="data-table">
-          <caption>Documentação</caption>
-          <tbody>
-            ${tableRow('CPF', client.cpf)}
-            ${tableRow('RG', client.rg)}
-            ${tableRow('Órgão expedidor', client.orgaoExpedidor)}
-            ${tableRow('Data de emissão (RG)', formatDate(client.dataEmissao))}
-            ${tableRow('Título de eleitor', client.tituloEleitor)}
-          </tbody>
-        </table>
-
-        <table class="data-table">
-          <caption>Dados pessoais</caption>
-          <tbody>
-            ${tableRow('Data de nascimento', formatDate(client.birthDate))}
-            ${tableRow('Sexo', label(client.sexo, SEXO_LABELS))}
-            ${tableRow('Naturalidade', client.naturalidade)}
-            ${tableRow('Estado civil', label(client.estadoCivil, ESTADO_CIVIL_LABELS))}
-            ${tableRow('Escolaridade', label(client.escolaridade, ESCOLARIDADE_LABELS))}
-            ${tableRow('Profissão', client.profissao)}
-            ${tableRow('Trabalha', boolLabel(client.trabalha))}
-            ${tableRow('Número de filhos', filhos)}
-          </tbody>
-        </table>
-
-        <table class="data-table data-table--full">
-          <caption>Filiação</caption>
-          <tbody>
-            ${tableRowWide('Pai', client.filiacaoPai)}
-            ${tableRowWide('Mãe', client.filiacaoMae)}
-          </tbody>
-        </table>
-
-        <table class="data-table data-table--full">
-          <caption>Contato e endereço</caption>
-          <tbody>
-            ${tableRowPair('Telefone', client.phone, 'E-mail', client.email)}
-            ${tableRowWide('Endereço', client.address)}
-            ${tableRowPair('Cidade', client.city, 'Estado', client.state)}
-          </tbody>
-        </table>
+      <div class="patient-block">
+        ${buildPhotoHtml(client)}
+        <div class="patient-block__main">
+          <p class="patient-block__name">${escapeHtml(client.fullName)}</p>
+          <div class="compact-fields">
+            ${compactGroup(
+              'Documentação',
+              `
+              ${compactField('CPF', client.cpf)}
+              ${compactField('RG', client.rg)}
+              ${compactField('Órgão expedidor', client.orgaoExpedidor)}
+              ${compactField('Emissão RG', formatDate(client.dataEmissao))}
+              ${compactField('Título de eleitor', client.tituloEleitor)}
+            `
+            )}
+            ${compactGroup(
+              'Dados pessoais',
+              `
+              ${compactField('Nascimento', formatDate(client.birthDate))}
+              ${compactField('Sexo', label(client.sexo, SEXO_LABELS))}
+              ${compactField('Naturalidade', client.naturalidade)}
+              ${compactField('Estado civil', label(client.estadoCivil, ESTADO_CIVIL_LABELS))}
+              ${compactField('Escolaridade', label(client.escolaridade, ESCOLARIDADE_LABELS))}
+              ${compactField('Profissão', client.profissao)}
+              ${compactField('Trabalha', boolLabel(client.trabalha))}
+              ${compactField('Filhos', filhos)}
+            `
+            )}
+            ${compactGroup(
+              'Filiação',
+              `
+              ${compactField('Pai', client.filiacaoPai, true)}
+              ${compactField('Mãe', client.filiacaoMae, true)}
+            `
+            )}
+            ${compactGroup(
+              'Contato e endereço',
+              `
+              ${compactField('Telefone', client.phone)}
+              ${compactField('E-mail', client.email)}
+              ${compactField('Endereço', client.address, true)}
+              ${compactField('Cidade', client.city)}
+              ${compactField('Estado', client.state)}
+            `
+            )}
+          </div>
+        </div>
       </div>`;
   }
 
-  function buildQuestionnaireBlock(items) {
-    return items
-      .map((item) => {
-        if (item.type === 'yn') return questionYesNo(item.text);
-        return questionLine(item.text);
-      })
-      .join('');
-  }
+  function buildQuestionnaireHtml() {
+    const itemsHtml = QUESTIONNAIRE_ITEMS.map((item) =>
+      item.type === 'yn' ? questionYesNo(item.text) : questionLine(item.text)
+    ).join('');
 
-  const QUESTIONNAIRE_ITEMS = [
-    { type: 'yn', text: 'Nosso tratamento é evangélico. Está disposto?' },
-    { type: 'yn', text: 'Você está disposto a se recuperar?' },
-    { type: 'line', text: 'Doenças que tem ou já teve?' },
-    { type: 'line', text: 'Já passou em alguma clínica? Qual?' },
-    { type: 'line', text: 'Quais drogas fez uso?' },
-    { type: 'line', text: 'Responde algum processo? Qual?' },
-    { type: 'line', text: 'Com que idade começou a usar drogas?' },
-    { type: 'line', text: 'Pretende ficar o tempo determinado?' },
-    { type: 'yn', text: 'Está disposto a obedecer o regulamento da casa?' },
-  ];
-
-  function buildQuestionnaireHtml(items) {
     return `
       <section class="questionnaire">
         <h2 class="section-title">Questionário</h2>
-        <ol class="question-list">
-          ${buildQuestionnaireBlock(items)}
-        </ol>
+        <ol class="question-list">${itemsHtml}</ol>
       </section>`;
   }
 
@@ -201,69 +189,51 @@ const PatientPrint = (function createPatientPrintModule() {
 
     return `
       <div class="closing-block">
+        <div class="signatures">
+          <div class="signature-item">
+            <span class="signature-item__line"></span>
+            <span class="signature-item__label">Ass. do aluno</span>
+          </div>
+          <div class="signature-item">
+            <span class="signature-item__line"></span>
+            <span class="signature-item__label">Ass. do responsável</span>
+          </div>
+          <div class="signature-item">
+            <span class="signature-item__line"></span>
+            <span class="signature-item__label">Ass. do obreiro CTAD</span>
+          </div>
+        </div>
         <div class="stay-dates">
           <p class="stay-dates__item">
             <span class="stay-dates__label">Data de chegada</span>
             <span class="date-field">
-              <span class="date-box">${escapeHtml(arrival.day)}</span> /
-              <span class="date-box">${escapeHtml(arrival.month)}</span> /
-              <span class="date-box date-box--year">${escapeHtml(arrival.year)}</span>
+              <span class="date-box">${escapeHtml(arrival.day)}</span>/<span class="date-box">${escapeHtml(arrival.month)}</span>/<span class="date-box date-box--year">${escapeHtml(arrival.year)}</span>
             </span>
           </p>
+          <span class="stay-dates__sep">·</span>
           <p class="stay-dates__item">
             <span class="stay-dates__label">Data de saída</span>
             <span class="date-field">
-              <span class="date-box">${escapeHtml(exit.day)}</span> /
-              <span class="date-box">${escapeHtml(exit.month)}</span> /
-              <span class="date-box date-box--year">${escapeHtml(exit.year)}</span>
+              <span class="date-box">${escapeHtml(exit.day)}</span>/<span class="date-box">${escapeHtml(exit.month)}</span>/<span class="date-box date-box--year">${escapeHtml(exit.year)}</span>
             </span>
           </p>
-        </div>
-
-        <div class="signatures">
-          <p class="signature-line"><span>Ass. do aluno</span><span class="fill-line"></span></p>
-          <p class="signature-line"><span>Ass. do responsável</span><span class="fill-line"></span></p>
-          <p class="signature-line"><span>Ass. do obreiro CTAD</span><span class="fill-line"></span></p>
         </div>
       </div>`;
   }
 
-  function buildLetterheadHtml(client, compact) {
+  function buildLetterheadHtml() {
     const logoUrl = `${window.location.origin}/images/logo.png`;
-    const generatedAt = new Date().toLocaleString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-
-    if (compact) {
-      return `
-        <header class="letterhead letterhead--compact">
-          <img src="${logoUrl}" alt="CTAD" class="letterhead__logo">
-          <div class="letterhead__content">
-            <p class="letterhead__org">Comunidade Terapêutica Amparados por Deus</p>
-            <h1 class="letterhead__title">Ficha de Cadastro — continuação</h1>
-          </div>
-        </header>`;
-    }
-
     return `
       <header class="letterhead">
         <img src="${logoUrl}" alt="CTAD" class="letterhead__logo">
-        <p class="letterhead__org">Comunidade Terapêutica Amparados por Deus</p>
-        <h1 class="letterhead__title">Ficha de Cadastro do Paciente</h1>
-        <div class="letterhead__meta">
-          <p>Documento gerado em ${escapeHtml(generatedAt)}</p>
+        <div class="letterhead__text">
+          <p class="letterhead__org">Comunidade Terapêutica Amparados por Deus</p>
+          <h1 class="letterhead__title">Ficha de Cadastro do Paciente</h1>
         </div>
       </header>`;
   }
 
   function buildPrintDocument(client) {
-    const page1Questions = QUESTIONNAIRE_ITEMS.slice(0, 4);
-    const page2Questions = QUESTIONNAIRE_ITEMS.slice(4);
-
     return `<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -276,159 +246,100 @@ const PatientPrint = (function createPatientPrintModule() {
       --color-text: #1e2d2a;
       --color-text-muted: #5a6e69;
       --color-border: #c5d5d0;
-      --color-bg-muted: #f2f7f5;
-      --page-height: 277mm;
+      --color-bg-muted: #f4f8f6;
+      --page-width: 210mm;
+      --page-height: 297mm;
+      --page-padding: 10mm;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     @page {
       size: A4 portrait;
-      margin: 10mm 12mm 10mm;
+      margin: 10mm;
+    }
+
+    html, body {
+      height: 100%;
     }
 
     body {
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
       color: var(--color-text);
-      line-height: 1.4;
-      font-size: 10pt;
+      line-height: 1.3;
+      font-size: 8.5pt;
       background: #e8ecea;
     }
 
-    .print-actions {
-      display: flex;
-      gap: 0.75rem;
-      justify-content: center;
-      margin: 1.5rem 0 2rem;
-    }
-
-    .print-actions button {
-      font-family: inherit;
-      font-size: 0.9rem;
-      padding: 0.55rem 1.25rem;
-      border-radius: 8px;
-      cursor: pointer;
-      border: 1px solid var(--color-primary);
-    }
-
-    .print-actions button:first-child {
-      background: var(--color-primary);
-      color: #fff;
-    }
-
-    .print-actions button:last-child {
-      background: #fff;
-      color: var(--color-primary);
-    }
-
     .print-sheet {
-      width: 210mm;
+      width: var(--page-width);
+      min-height: var(--page-height);
       margin: 0 auto;
     }
 
     .print-page {
-      width: 210mm;
+      width: var(--page-width);
       min-height: var(--page-height);
+      height: var(--page-height);
       background: #fff;
-      padding: 0 12mm 10mm;
+      padding: var(--page-padding);
       display: flex;
       flex-direction: column;
-      page-break-after: always;
-      break-after: page;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-      margin-bottom: 12px;
-    }
-
-    .print-page:last-child {
-      page-break-after: auto;
-      break-after: auto;
-      margin-bottom: 0;
     }
 
     .print-page__body {
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 0.55rem;
+      gap: 2.5mm;
+      min-height: 0;
     }
 
-    .print-page__fill {
-      flex: 1;
-      min-height: 0.5rem;
-    }
-
-    /* Letterhead */
     .letterhead {
-      text-align: center;
-      padding: 4mm 0 3mm;
-      border-bottom: 2.5px solid var(--color-primary);
-      margin-bottom: 3mm;
-      flex-shrink: 0;
-    }
-
-    .letterhead--compact {
       display: flex;
       align-items: center;
       gap: 3mm;
-      text-align: left;
-      padding: 3mm 0 2.5mm;
-    }
-
-    .letterhead--compact .letterhead__logo {
-      width: 48px;
-      margin: 0;
-    }
-
-    .letterhead--compact .letterhead__title {
-      font-size: 0.95rem;
-      margin-bottom: 0;
+      padding: 2mm 0;
+      border-bottom: 2px solid var(--color-primary);
+      margin-bottom: 2mm;
+      flex-shrink: 0;
     }
 
     .letterhead__logo {
-      width: 72px;
+      width: 46px;
       height: auto;
-      margin: 0 auto 1.5mm;
-      display: block;
+      flex-shrink: 0;
     }
 
     .letterhead__org {
-      font-size: 8pt;
+      font-size: 7pt;
       color: var(--color-text-muted);
-      margin-bottom: 1mm;
     }
 
     .letterhead__title {
-      font-size: 13pt;
+      font-size: 10.5pt;
       font-weight: 800;
       color: var(--color-primary-dark);
-      margin-bottom: 2mm;
+      line-height: 1.15;
     }
 
-    .letterhead__meta {
-      font-size: 8pt;
-      color: var(--color-text-muted);
-    }
-
-    .letterhead__meta p + p {
-      margin-top: 0.5mm;
-    }
-
-    /* Patient hero */
-    .patient-hero {
+    .patient-block {
       display: flex;
-      gap: 4mm;
-      align-items: stretch;
-      padding: 3mm;
+      gap: 3mm;
+      align-items: flex-start;
+      padding: 2mm 2.5mm;
       background: var(--color-bg-muted);
       border: 1px solid var(--color-border);
-      border-radius: 3px;
+      border-radius: 2px;
+      flex-shrink: 0;
     }
 
     .patient-photo {
-      width: 28mm;
-      height: 36mm;
+      width: 22mm;
+      height: 28mm;
       object-fit: cover;
-      border: 1.5px solid var(--color-border);
+      border: 1px solid var(--color-border);
       border-radius: 2px;
       flex-shrink: 0;
       background: #fff;
@@ -438,118 +349,100 @@ const PatientPrint = (function createPatientPrintModule() {
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 7.5pt;
+      font-size: 6.5pt;
       color: var(--color-text-muted);
       text-align: center;
-      line-height: 1.3;
-    }
-
-    .patient-hero__info {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      gap: 2mm;
-    }
-
-    .patient-hero__name {
-      font-size: 12pt;
-      font-weight: 800;
-      color: var(--color-primary-dark);
       line-height: 1.2;
     }
 
-    /* Data tables */
-    .data-sections {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 2.5mm;
+    .patient-block__main {
+      flex: 1;
+      min-width: 0;
     }
 
-    .data-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 8.5pt;
-      border: 1px solid var(--color-border);
-    }
-
-    .data-table--full {
-      grid-column: 1 / -1;
-    }
-
-    .data-table caption {
-      caption-side: top;
-      text-align: left;
-      font-size: 8pt;
-      font-weight: 700;
+    .patient-block__name {
+      font-size: 10pt;
+      font-weight: 800;
       color: var(--color-primary-dark);
-      padding: 1.5mm 2mm;
-      background: #e8f2ef;
-      border: 1px solid var(--color-border);
-      border-bottom: none;
+      line-height: 1.15;
+      margin-bottom: 1.5mm;
     }
 
-    .data-table th,
-    .data-table td {
-      border: 1px solid var(--color-border);
-      padding: 1.8mm 2.5mm;
-      vertical-align: top;
-      text-align: left;
+    .compact-fields {
+      display: flex;
+      flex-direction: column;
+      gap: 1.2mm;
     }
 
-    .data-table th {
-      width: 38%;
-      font-weight: 600;
+    .compact-fields__title {
+      font-size: 6.2pt;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--color-primary-dark);
+      margin-bottom: 0.5mm;
+    }
+
+    .compact-fields__row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8mm 3mm;
+      align-items: baseline;
+    }
+
+    .compact-field {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 0.8mm;
+      font-size: 7.2pt;
+      line-height: 1.2;
+      max-width: 100%;
+    }
+
+    .compact-field--wide {
+      flex: 1 1 100%;
+    }
+
+    .compact-field__label {
+      font-size: 6.2pt;
+      font-weight: 700;
       color: var(--color-text-muted);
-      background: #fafcfc;
-      font-size: 7.5pt;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
 
-    .data-table td {
+    .compact-field__label::after {
+      content: ':';
+    }
+
+    .compact-field__value {
       font-weight: 500;
       word-break: break-word;
     }
 
-    .data-table__row--wide th {
-      width: 18%;
-    }
-
-    .data-table__row--pair th {
-      width: 14%;
-    }
-
-    .data-table__row--pair td {
-      width: 36%;
-    }
-
-    /* Questionnaire */
     .section-title {
-      font-size: 10pt;
+      font-size: 8pt;
       font-weight: 700;
       color: var(--color-primary-dark);
-      padding: 1.5mm 0;
-      border-bottom: 1.5px solid var(--color-primary);
-      margin-bottom: 2mm;
+      padding-bottom: 0.5mm;
+      border-bottom: 1px solid var(--color-primary);
+      margin-bottom: 1mm;
     }
 
     .questionnaire {
-      flex: 1;
+      flex: 0 0 auto;
       display: flex;
       flex-direction: column;
-    }
-
-    .questionnaire--page2 {
-      flex: 1;
     }
 
     .question-list {
       list-style: none;
       counter-reset: question;
-      flex: 1;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
-      gap: 1mm;
+      gap: 0;
     }
 
     .question {
@@ -557,51 +450,36 @@ const PatientPrint = (function createPatientPrintModule() {
       display: flex;
       flex-wrap: wrap;
       align-items: flex-end;
-      gap: 2mm;
-      padding: 2.5mm 0;
+      gap: 1.5mm;
+      padding: 0.6mm 0;
       border-bottom: 1px dotted var(--color-border);
-      font-size: 9.5pt;
-      min-height: 9mm;
+      font-size: 7.5pt;
     }
 
     .question::before {
       content: counter(question) ".";
       font-weight: 700;
       color: var(--color-primary-dark);
-      min-width: 5mm;
+      min-width: 4mm;
       align-self: flex-start;
-      padding-top: 0.5mm;
     }
 
     .question__text {
       flex: 1;
-      min-width: 40%;
+      min-width: 30%;
       align-self: flex-start;
-      padding-top: 0.5mm;
     }
 
     .question--yn {
       align-items: center;
     }
 
-    .question--yn .question__text {
-      flex: 1;
-    }
-
     .question__options {
       display: flex;
-      gap: 5mm;
+      gap: 3mm;
       white-space: nowrap;
       margin-left: auto;
-    }
-
-    .yn-option {
-      font-size: 9pt;
-    }
-
-    .question--line {
-      flex-direction: row;
-      align-items: flex-end;
+      font-size: 7pt;
     }
 
     .question--line .question__text {
@@ -611,171 +489,151 @@ const PatientPrint = (function createPatientPrintModule() {
 
     .question--line .fill-line {
       flex: 1;
-      min-width: 30mm;
-    }
-
-    .questionnaire--page2 .question {
-      min-height: 11mm;
-      padding: 3mm 0;
-    }
-
-    .questionnaire--page2 .question--line .fill-line {
-      min-height: 7mm;
+      min-width: 20mm;
       border-bottom: 1px solid var(--color-text);
+      min-height: 3mm;
     }
 
     .fill-line {
       display: block;
       border-bottom: 1px solid var(--color-text);
-      min-height: 5mm;
+      min-height: 3mm;
     }
 
-    /* Dates & signatures */
     .closing-block {
-      margin-top: auto;
-      padding-top: 4mm;
-      flex-shrink: 0;
-    }
-
-    .stay-dates {
-      display: flex;
-      justify-content: space-between;
-      gap: 6mm;
-      padding: 4mm;
-      margin-bottom: 6mm;
-      border: 1px solid var(--color-border);
-      background: var(--color-bg-muted);
-      border-radius: 3px;
-    }
-
-    .stay-dates__item {
       flex: 1;
-      font-size: 9.5pt;
-    }
-
-    .stay-dates__label {
-      display: block;
-      font-size: 7.5pt;
-      font-weight: 700;
-      color: var(--color-text-muted);
-      text-transform: uppercase;
-      margin-bottom: 2mm;
-    }
-
-    .date-field {
-      font-size: 11pt;
-      font-weight: 600;
-    }
-
-    .date-box {
-      display: inline-block;
-      min-width: 8mm;
-      text-align: center;
-      border-bottom: 1.5px solid var(--color-text);
-      padding: 0 1mm;
-    }
-
-    .date-box--year {
-      min-width: 14mm;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 8mm;
+      padding: 4mm 0;
+      margin-top: 2mm;
+      border-top: 1px solid var(--color-border);
+      min-height: 0;
     }
 
     .signatures {
       display: flex;
       flex-direction: column;
-      gap: 10mm;
-      padding-top: 2mm;
+      justify-content: center;
+      gap: 12mm;
+      width: 72%;
+      max-width: 145mm;
     }
 
-    .signature-line {
+    .signature-item {
       display: flex;
-      align-items: flex-end;
-      gap: 3mm;
-      font-size: 9.5pt;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      gap: 1.5mm;
     }
 
-    .signature-line > span:first-child {
+    .signature-item__line {
+      display: block;
+      width: 100%;
+      border-bottom: 1px solid var(--color-text);
+      min-height: 7mm;
+    }
+
+    .signature-item__label {
+      font-size: 7.5pt;
+      text-align: center;
+      color: var(--color-text-muted);
+    }
+
+    .stay-dates {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: baseline;
+      gap: 2mm 6mm;
+      width: 100%;
+      margin-top: 4mm;
+    }
+
+    .stay-dates__sep {
+      color: var(--color-text-muted);
+      font-size: 8pt;
+    }
+
+    .stay-dates__item {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 2mm;
+      font-size: 7.5pt;
+    }
+
+    .stay-dates__label {
+      font-size: 6.5pt;
+      font-weight: 700;
+      color: var(--color-text-muted);
+      text-transform: uppercase;
       white-space: nowrap;
-      min-width: 38mm;
     }
 
-    .signature-line .fill-line {
-      flex: 1;
-      min-height: 8mm;
+    .stay-dates__label::after {
+      content: ':';
+      margin-left: 0.5mm;
+    }
+
+    .date-field {
+      font-size: 8.5pt;
+      font-weight: 600;
+    }
+
+    .date-box {
+      display: inline-block;
+      min-width: 6mm;
+      text-align: center;
+      border-bottom: 1px solid var(--color-text);
+    }
+
+    .date-box--year {
+      min-width: 10mm;
     }
 
     .print-footer {
-      margin-top: 4mm;
-      padding-top: 2mm;
-      border-top: 1px solid var(--color-border);
       text-align: center;
-      font-size: 7pt;
+      font-size: 6.5pt;
       color: var(--color-text-muted);
       flex-shrink: 0;
+      padding-top: 1mm;
     }
 
     @media print {
-      body {
-        background: #fff;
-        font-size: 9.5pt;
+      body { background: #fff; }
+
+      .print-sheet {
+        width: auto;
+        min-height: auto;
+        margin: 0;
       }
-
-      .print-actions { display: none !important; }
-
-      .print-sheet { width: auto; margin: 0; }
 
       .print-page {
         width: auto;
-        min-height: var(--page-height);
+        min-height: 277mm;
+        height: 277mm;
         padding: 0;
-        margin: 0;
         box-shadow: none;
+        page-break-after: avoid;
+        page-break-inside: avoid;
       }
     }
   </style>
 </head>
 <body>
-  <!--div class="print-actions">
-    <button type="button" onclick="window.print()">Imprimir</button>
-    <button type="button" onclick="window.close()">Fechar</button>
-  </div-->
-
   <div class="print-sheet">
-    <!-- Página 1: dados do paciente + início do questionário -->
     <div class="print-page">
-      ${buildLetterheadHtml(client, false)}
-
+      ${buildLetterheadHtml()}
       <div class="print-page__body">
-        <div class="patient-hero">
-          ${buildPhotoHtml(client)}
-          <div class="patient-hero__info">
-            <p class="patient-hero__name">${escapeHtml(client.fullName)}</p>
-          </div>
-        </div>
-
-        ${buildPatientTablesHtml(client)}
-
-        ${buildQuestionnaireHtml(page1Questions)}
-      </div>
-    </div>
-
-    <!-- Página 2: questionário (continuação) + datas e assinaturas -->
-    <div class="print-page">
-      ${buildLetterheadHtml(client, true)}
-
-      <div class="print-page__body">
-        <div class="questionnaire questionnaire--page2">
-          <h2 class="section-title">Questionário (continuação)</h2>
-          <ol class="question-list" style="counter-reset: question 4">
-            ${buildQuestionnaireBlock(page2Questions)}
-          </ol>
-        </div>
-
-        <div class="print-page__fill"></div>
-
+        ${buildPatientDataHtml(client)}
+        ${buildQuestionnaireHtml()}
         ${buildDatesAndSignaturesHtml(client)}
-
         <footer class="print-footer">
-          CTAD — Comunidade Terapêutica Amparados por Deus · Ficha de cadastro do paciente
+          CTAD — Comunidade Terapêutica Amparados por Deus
         </footer>
       </div>
     </div>
@@ -830,21 +688,13 @@ const PatientPrint = (function createPatientPrintModule() {
         return;
       }
       ready = true;
-      const logos = printWindow.document.querySelectorAll('.letterhead__logo');
-      const pending = Array.from(logos).filter((logo) => !logo.complete);
-      if (pending.length === 0) {
+      const logo = printWindow.document.querySelector('.letterhead__logo');
+      if (logo && !logo.complete) {
+        logo.addEventListener('load', triggerPrint, { once: true });
+        logo.addEventListener('error', triggerPrint, { once: true });
+      } else {
         setTimeout(triggerPrint, 300);
-        return;
       }
-      let loaded = 0;
-      const onLogoDone = () => {
-        loaded += 1;
-        if (loaded >= pending.length) triggerPrint();
-      };
-      pending.forEach((logo) => {
-        logo.addEventListener('load', onLogoDone, { once: true });
-        logo.addEventListener('error', onLogoDone, { once: true });
-      });
     };
 
     printWindow.addEventListener('load', onReady, { once: true });
