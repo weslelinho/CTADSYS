@@ -224,6 +224,52 @@ const Reports = (function createReportsModule() {
     );
   }
 
+  function applyActionFilters(actions) {
+    if (!actionCheckboxes) return;
+    const selected = new Set(Array.isArray(actions) ? actions : []);
+    actionCheckboxes.querySelectorAll('input[type="checkbox"]').forEach((input) => {
+      input.checked = selected.has(input.value);
+    });
+  }
+
+  async function loadSavedActionFilters() {
+    if (!actionCheckboxes) return;
+
+    try {
+      const res = await fetch('/auth/me/report-preferences');
+      if (res.status === 401) {
+        window.location.href = '/?login=required';
+        return;
+      }
+      if (!res.ok) return;
+
+      const data = await res.json();
+      applyActionFilters(data.actionFilters);
+    } catch {
+      // Keep current checkbox state
+    }
+  }
+
+  async function saveActionFilters(actions) {
+    try {
+      await fetch('/auth/me/report-preferences', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ actionFilters: actions }),
+      });
+    } catch {
+      // Preference persistence is best-effort
+    }
+  }
+
+  async function clearSavedActionFilters() {
+    try {
+      await fetch('/auth/me/report-preferences', { method: 'DELETE' });
+    } catch {
+      // Preference persistence is best-effort
+    }
+  }
+
   function renderActionCheckboxes() {
     if (!actionCheckboxes || actionCheckboxes.dataset.rendered === 'true') return;
 
@@ -820,6 +866,7 @@ const Reports = (function createReportsModule() {
 
       const groups = groupLogsByAction(logs);
       openPrintReport(buildPrintDocument(groups, logs.length));
+      await saveActionFilters(getSelectedActions());
     } catch {
       window.alert('Erro ao gerar relatório. Verifique se o servidor está em execução.');
     } finally {
@@ -992,7 +1039,7 @@ const Reports = (function createReportsModule() {
     }
   }
 
-  function clearFilters() {
+  async function clearFilters() {
     if (clientSelect) clientSelect.value = '';
     if (userSelect) userSelect.value = '';
     if (dateFromInput) dateFromInput.value = '';
@@ -1005,6 +1052,7 @@ const Reports = (function createReportsModule() {
     if (reportSearchInput) reportSearchInput.value = '';
     searchFilter = '';
     reportPage = 1;
+    await clearSavedActionFilters();
     loadLogs();
   }
 
@@ -1065,9 +1113,10 @@ const Reports = (function createReportsModule() {
 
     if (!filtersLoaded) {
       filtersLoaded = true;
-      loadFilterOptions();
+      await loadFilterOptions();
     }
 
+    await loadSavedActionFilters();
     await loadLogs();
   }
 
